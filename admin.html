@@ -29,19 +29,15 @@
       min-height: 100vh;
     }
 
-    /* ── LOGIN SCREEN ── */
+    /* ── LOGIN ── */
     #login-screen {
       min-height: 100vh;
       display: flex; align-items: center; justify-content: center;
-      background: var(--bg);
     }
     .login-box {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2.5rem;
-      width: 100%; max-width: 360px;
-      text-align: center;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 2.5rem;
+      width: 100%; max-width: 360px; text-align: center;
     }
     .login-box .logo {
       font-family: 'JetBrains Mono', monospace;
@@ -56,15 +52,11 @@
       border: 1px solid var(--border); border-radius: 8px;
       padding: 0.7rem 1rem; color: var(--text);
       font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem;
-      outline: none; margin-bottom: 0.8rem;
-      transition: border-color 0.2s;
+      outline: none; margin-bottom: 0.8rem; transition: border-color 0.2s;
     }
     .login-box input:focus { border-color: var(--accent); }
     .login-box input::placeholder { color: var(--muted); }
-    #login-error {
-      color: var(--red); font-size: 0.8rem;
-      margin-bottom: 0.8rem; display: none;
-    }
+    #login-error { color: var(--red); font-size: 0.8rem; margin-bottom: 0.8rem; display: none; }
     .btn-login {
       width: 100%; padding: 0.75rem;
       background: var(--accent); color: #fff;
@@ -79,10 +71,8 @@
     #admin-screen { display: none; }
 
     .admin-header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 2rem;
-      height: 62px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 2rem; height: 62px;
       display: flex; align-items: center; justify-content: space-between;
       position: sticky; top: 0; z-index: 100;
     }
@@ -103,48 +93,34 @@
 
     /* ── TABS ── */
     .tabs {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 2rem;
-      display: flex; gap: 0;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 2rem; display: flex;
     }
     .tab-btn {
       background: none; border: none; border-bottom: 2px solid transparent;
       color: var(--muted); font-family: 'Space Grotesk', sans-serif;
       font-size: 0.88rem; font-weight: 500;
-      padding: 1rem 1.5rem; cursor: pointer;
-      transition: all 0.2s;
+      padding: 1rem 1.5rem; cursor: pointer; transition: all 0.2s;
     }
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    /* ── TAB CONTENT ── */
     .tab-content { display: none; padding: 2rem; max-width: 1100px; margin: 0 auto; }
     .tab-content.active { display: block; }
 
-    /* ── SECTION TITLE ── */
-    .section-title {
-      font-size: 1.4rem; font-weight: 700; margin-bottom: 0.3rem;
-    }
+    .section-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.3rem; }
     .section-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
 
-    /* ── FORM CARD ── */
+    /* ── FORM ── */
     .form-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 2rem;
-      margin-bottom: 2rem;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 2rem; margin-bottom: 2rem;
     }
     .form-card h3 {
       font-size: 1rem; font-weight: 600; margin-bottom: 1.5rem;
       padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 0.5rem;
     }
-    .form-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
-      margin-bottom: 1rem;
-    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
     .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
     .form-group.full { grid-column: 1/-1; }
     label {
@@ -152,57 +128,50 @@
       letter-spacing: 0.05em; text-transform: uppercase;
     }
     input[type="text"], input[type="url"], textarea, select {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.65rem 0.9rem;
-      color: var(--text);
-      font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem;
-      outline: none; transition: border-color 0.2s; width: 100%;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.65rem 0.9rem;
+      color: var(--text); font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem; outline: none; transition: border-color 0.2s; width: 100%;
     }
     input:focus, textarea:focus, select:focus { border-color: var(--accent); }
     input::placeholder, textarea::placeholder { color: var(--muted); }
     textarea { resize: vertical; min-height: 90px; }
     select option { background: var(--surface); }
 
-    /* image upload */
-    .upload-area {
-      border: 2px dashed var(--border);
-      border-radius: 10px;
-      padding: 2rem;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      position: relative;
+    /* image URL preview */
+    .img-url-wrap { position: relative; }
+    .img-url-wrap input { padding-right: 5rem; }
+    .btn-preview-url {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 5px; font-size: 0.72rem; font-weight: 600;
+      padding: 0.3rem 0.7rem; cursor: pointer; transition: background 0.2s;
     }
-    .upload-area:hover { border-color: var(--accent); background: rgba(79,142,247,0.04); }
-    .upload-area input[type="file"] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer;
-      width: 100%; height: 100%;
-    }
-    .upload-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    .upload-area p { color: var(--muted); font-size: 0.85rem; }
-    .upload-area span { color: var(--accent); font-weight: 600; }
+    .btn-preview-url:hover { background: #3a7df0; }
+
     #img-preview {
-      margin-top: 1rem; display: none;
-    }
-    #img-preview img {
-      max-height: 160px; border-radius: 8px;
+      margin-top: 0.8rem; display: none;
+      border-radius: 10px; overflow: hidden;
       border: 1px solid var(--border);
     }
-
-    /* progress */
-    .progress-wrap {
-      background: var(--surface); border-radius: 6px;
-      overflow: hidden; height: 6px; margin-top: 1rem; display: none;
+    #img-preview img {
+      width: 100%; max-height: 200px; object-fit: cover; display: block;
     }
-    .progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      width: 0%; transition: width 0.3s;
+    .preview-error {
+      padding: 0.6rem 1rem; font-size: 0.82rem; color: var(--red);
+      display: none;
     }
 
-    /* form actions */
+    /* hint box */
+    .hint-box {
+      background: rgba(79,142,247,0.07);
+      border: 1px solid rgba(79,142,247,0.25);
+      border-radius: 8px; padding: 0.8rem 1rem;
+      font-size: 0.8rem; color: rgba(255,255,255,0.6);
+      margin-top: 0.6rem; line-height: 1.6;
+    }
+    .hint-box strong { color: var(--accent); }
+
     .form-actions { display: flex; gap: 0.8rem; margin-top: 1.5rem; flex-wrap: wrap; }
     .btn {
       display: inline-flex; align-items: center; gap: 0.4rem;
@@ -283,24 +252,20 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
 
-    /* visitors table */
     .visitors-table {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 14px; overflow: hidden;
     }
     .visitors-table table { width: 100%; border-collapse: collapse; }
     .visitors-table th {
-      background: var(--surface);
-      font-size: 0.72rem; color: var(--muted);
+      background: var(--surface); font-size: 0.72rem; color: var(--muted);
       text-transform: uppercase; letter-spacing: 0.08em;
       padding: 0.85rem 1rem; text-align: left;
-      font-family: 'JetBrains Mono', monospace;
-      border-bottom: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace; border-bottom: 1px solid var(--border);
     }
     .visitors-table td {
       padding: 0.85rem 1rem; font-size: 0.85rem;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
+      border-bottom: 1px solid var(--border); vertical-align: middle;
     }
     .visitors-table tr:last-child td { border-bottom: none; }
     .visitors-table tr:hover td { background: rgba(79,142,247,0.04); }
@@ -316,11 +281,9 @@
     .badge-edge    { background: rgba(167,139,250,0.15); color: var(--accent2); }
     .badge-other   { background: rgba(100,116,139,0.15); color: var(--muted); }
     .time-cell { color: var(--muted); font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; }
-
     .empty-row { text-align: center; padding: 3rem; color: var(--muted); }
     .loading-row { text-align: center; padding: 2rem; color: var(--muted); }
 
-    /* ── RESPONSIVE ── */
     @media (max-width: 640px) {
       .form-grid { grid-template-columns: 1fr; }
       .tab-btn { padding: 0.8rem 1rem; font-size: 0.82rem; }
@@ -331,7 +294,7 @@
 </head>
 <body>
 
-<!-- ══════════════ LOGIN ══════════════ -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
     <div class="logo">WarTech</div>
@@ -343,10 +306,9 @@
   </div>
 </div>
 
-<!-- ══════════════ ADMIN ══════════════ -->
+<!-- ADMIN -->
 <div id="admin-screen">
 
-  <!-- HEADER -->
   <div class="admin-header">
     <div>
       <div class="logo">WarTech Admin</div>
@@ -358,30 +320,36 @@
     </div>
   </div>
 
-  <!-- TABS -->
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('add')">➕ Add Project</button>
     <button class="tab-btn" onclick="switchTab('manage')">📁 Manage Projects</button>
     <button class="tab-btn" onclick="switchTab('visitors')">👥 Visitors</button>
   </div>
 
-  <!-- ── TAB: ADD PROJECT ── -->
+  <!-- TAB: ADD -->
   <div class="tab-content active" id="tab-add">
     <div class="section-title">Add New Project</div>
     <div class="section-sub">Fill in the details below and publish to your portfolio homepage.</div>
 
     <div class="form-card">
-      <h3>📷 Project Image</h3>
-      <div class="upload-area" id="upload-area">
-        <input type="file" id="img-file" accept="image/*" onchange="previewImg(this)"/>
-        <div class="upload-icon">🖼</div>
-        <p><span>Click to upload</span> or drag & drop</p>
-        <p style="margin-top:0.3rem;font-size:0.75rem">PNG, JPG, WEBP — max 5MB</p>
+      <h3>🖼 Project Image</h3>
+      <div class="form-group">
+        <label>Image URL</label>
+        <div class="img-url-wrap">
+          <input type="url" id="p-image-url" placeholder="https://i.imgur.com/your-image.jpg" oninput="onImageUrlInput()"/>
+          <button class="btn-preview-url" onclick="previewImageUrl()">Preview</button>
+        </div>
       </div>
-      <div id="img-preview"><img id="preview-img" src="" alt="preview"/></div>
-      <div class="progress-wrap" id="upload-progress">
-        <div class="progress-bar" id="progress-bar"></div>
+      <div class="hint-box">
+        <strong>How to get a free image URL:</strong><br>
+        1. Go to <strong>imgur.com</strong> → upload your image → right-click the image → "Copy image address"<br>
+        2. Or upload to <strong>Google Drive</strong> → share as public → use a direct link converter<br>
+        3. Or use any direct image link ending in <strong>.jpg / .png / .webp</strong>
       </div>
+      <div id="img-preview">
+        <img id="preview-img" src="" alt="preview" onerror="imageLoadError()"/>
+      </div>
+      <div class="preview-error" id="preview-error">⚠️ Could not load image. Check the URL.</div>
     </div>
 
     <div class="form-card">
@@ -406,7 +374,7 @@
         </div>
         <div class="form-group full">
           <label>Technologies Used</label>
-          <input type="text" id="p-tech" placeholder="e.g. HTML, CSS, JavaScript, Firebase (comma separated)"/>
+          <input type="text" id="p-tech" placeholder="e.g. HTML, CSS, JavaScript, Firebase"/>
         </div>
       </div>
     </div>
@@ -424,7 +392,7 @@
         </div>
         <div class="form-group full">
           <label>APK Download URL (Android only)</label>
-          <input type="url" id="p-apk" placeholder="https://drive.google.com/... or direct link"/>
+          <input type="url" id="p-apk" placeholder="https://drive.google.com/..."/>
         </div>
       </div>
     </div>
@@ -437,7 +405,7 @@
     </div>
   </div>
 
-  <!-- ── TAB: MANAGE ── -->
+  <!-- TAB: MANAGE -->
   <div class="tab-content" id="tab-manage">
     <div class="section-title">Manage Projects</div>
     <div class="section-sub">Edit or delete your existing projects.</div>
@@ -446,40 +414,22 @@
     </div>
   </div>
 
-  <!-- ── TAB: VISITORS ── -->
+  <!-- TAB: VISITORS -->
   <div class="tab-content" id="tab-visitors">
     <div class="section-title">Visitor Analytics</div>
-    <div class="section-sub">Everyone who has visited your homepage — their device, browser, and time.</div>
-
-    <div class="stats-grid" id="visitor-stats">
-      <div class="stat-card">
-        <div class="slabel">Total Visits</div>
-        <div class="snum" id="stat-total">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="slabel">Mobile Visitors</div>
-        <div class="snum" id="stat-mobile">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="slabel">Desktop Visitors</div>
-        <div class="snum" id="stat-desktop">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="slabel">Today's Visits</div>
-        <div class="snum" id="stat-today">—</div>
-      </div>
+    <div class="section-sub">Everyone who visited your homepage.</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="slabel">Total Visits</div><div class="snum" id="stat-total">—</div></div>
+      <div class="stat-card"><div class="slabel">Mobile Visitors</div><div class="snum" id="stat-mobile">—</div></div>
+      <div class="stat-card"><div class="slabel">Desktop Visitors</div><div class="snum" id="stat-desktop">—</div></div>
+      <div class="stat-card"><div class="slabel">Today's Visits</div><div class="snum" id="stat-today">—</div></div>
     </div>
-
     <div class="visitors-table">
       <table>
         <thead>
           <tr>
-            <th>Device</th>
-            <th>OS</th>
-            <th>Browser</th>
-            <th>Screen</th>
-            <th>Language</th>
-            <th>Time</th>
+            <th>Device</th><th>OS</th><th>Browser</th>
+            <th>Screen</th><th>Language</th><th>Time</th>
           </tr>
         </thead>
         <tbody id="visitors-tbody">
@@ -489,7 +439,7 @@
     </div>
   </div>
 
-</div><!-- /admin-screen -->
+</div>
 
 <!-- EDIT MODAL -->
 <div id="edit-modal" style="
@@ -502,6 +452,18 @@
     max-height:90vh; overflow-y:auto; margin:1rem;
   ">
     <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem">✏️ Edit Project</h3>
+
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Image URL</label>
+      <div class="img-url-wrap">
+        <input type="url" id="e-image-url" placeholder="https://i.imgur.com/your-image.jpg" oninput="onEditImageUrlInput()"/>
+        <button class="btn-preview-url" onclick="previewEditImageUrl()">Preview</button>
+      </div>
+      <div id="e-img-preview" style="margin-top:0.8rem;display:none;border-radius:10px;overflow:hidden;border:1px solid var(--border)">
+        <img id="e-preview-img" src="" alt="preview" style="width:100%;max-height:160px;object-fit:cover;display:block" onerror="this.parentElement.style.display='none'"/>
+      </div>
+    </div>
+
     <div class="form-group" style="margin-bottom:1rem">
       <label>Title</label>
       <input type="text" id="e-title"/>
@@ -543,14 +505,11 @@
 
 <div id="toast"></div>
 
-<!-- ══════════════ FIREBASE ══════════════ -->
 <script type="module">
-  import { initializeApp }   from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc,
            doc, serverTimestamp, query, orderBy }
     from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-  import { getStorage, ref, uploadBytesResumable, getDownloadURL }
-    from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBFZYXN5MJ9WOMBXfCchUWnR9LEfOOzImw",
@@ -561,18 +520,15 @@
     appId: "1:45894924521:web:ab81de1a168022ba1d9878"
   };
 
-  const app     = initializeApp(firebaseConfig);
-  const db      = getFirestore(app);
-  const storage = getStorage(app);
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
 
-  // ── CREDENTIALS (change these) ──
-  const ADMIN_USER = "warbabar";
-  const ADMIN_PASS = "wartech2025";
+  const ADMIN_USER = "war";
+  const ADMIN_PASS = "1";
 
-  let editingId  = null;
-  let uploadedImageUrl = "";
+  let editingId = null;
 
-  // expose to window
+  // ── LOGIN ──
   window.doLogin = () => {
     const u = document.getElementById("login-user").value.trim();
     const p = document.getElementById("login-pass").value;
@@ -585,7 +541,6 @@
     }
   };
 
-  // enter key login
   document.getElementById("login-pass").addEventListener("keydown", e => {
     if (e.key === "Enter") window.doLogin();
   });
@@ -598,7 +553,7 @@
   };
 
   window.switchTab = (tab) => {
-    document.querySelectorAll(".tab-btn").forEach((b,i) => {
+    document.querySelectorAll(".tab-btn").forEach((b, i) => {
       b.classList.toggle("active", ["add","manage","visitors"][i] === tab);
     });
     document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
@@ -607,16 +562,38 @@
     if (tab === "visitors") loadVisitors();
   };
 
-  // ── IMAGE PREVIEW ──
-  window.previewImg = (input) => {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      document.getElementById("preview-img").src = e.target.result;
-      document.getElementById("img-preview").style.display = "block";
-    };
-    reader.readAsDataURL(file);
+  // ── IMAGE URL PREVIEW ──
+  window.onImageUrlInput = () => {
+    document.getElementById("img-preview").style.display = "none";
+    document.getElementById("preview-error").style.display = "none";
+  };
+
+  window.previewImageUrl = () => {
+    const url = document.getElementById("p-image-url").value.trim();
+    if (!url) return;
+    const preview = document.getElementById("img-preview");
+    const img = document.getElementById("preview-img");
+    const err = document.getElementById("preview-error");
+    err.style.display = "none";
+    img.src = url;
+    preview.style.display = "block";
+  };
+
+  window.imageLoadError = () => {
+    document.getElementById("img-preview").style.display = "none";
+    document.getElementById("preview-error").style.display = "block";
+  };
+
+  window.onEditImageUrlInput = () => {
+    document.getElementById("e-img-preview").style.display = "none";
+  };
+
+  window.previewEditImageUrl = () => {
+    const url = document.getElementById("e-image-url").value.trim();
+    if (!url) return;
+    const preview = document.getElementById("e-img-preview");
+    document.getElementById("e-preview-img").src = url;
+    preview.style.display = "block";
   };
 
   // ── PUBLISH PROJECT ──
@@ -635,13 +612,6 @@
     btn.textContent = "Publishing…";
 
     try {
-      let imageUrl = "";
-      const file = document.getElementById("img-file").files[0];
-
-      if (file) {
-        imageUrl = await uploadImage(file);
-      }
-
       const tech = document.getElementById("p-tech").value
         .split(",").map(t => t.trim()).filter(Boolean);
 
@@ -650,7 +620,7 @@
         description: desc,
         category: cat,
         technologies: tech,
-        imageUrl,
+        imageUrl:  document.getElementById("p-image-url").value.trim(),
         liveUrl:   document.getElementById("p-live").value.trim(),
         githubUrl: document.getElementById("p-github").value.trim(),
         apkUrl:    document.getElementById("p-apk").value.trim(),
@@ -668,37 +638,12 @@
     btn.textContent = "🚀 Publish Project";
   };
 
-  function uploadImage(file) {
-    return new Promise((resolve, reject) => {
-      const storageRef = ref(storage, `projects/${Date.now()}_${file.name}`);
-      const task = uploadBytesResumable(storageRef, file);
-      const progressWrap = document.getElementById("upload-progress");
-      const progressBar  = document.getElementById("progress-bar");
-      progressWrap.style.display = "block";
-
-      task.on("state_changed",
-        snap => {
-          const pct = (snap.bytesTransferred / snap.totalBytes) * 100;
-          progressBar.style.width = pct + "%";
-        },
-        err => reject(err),
-        async () => {
-          const url = await getDownloadURL(task.snapshot.ref);
-          progressWrap.style.display = "none";
-          resolve(url);
-        }
-      );
-    });
-  }
-
   window.clearForm = () => {
-    ["p-title","p-desc","p-tech","p-live","p-github","p-apk"]
+    ["p-title","p-desc","p-tech","p-live","p-github","p-apk","p-image-url"]
       .forEach(id => document.getElementById(id).value = "");
     document.getElementById("p-category").value = "";
-    document.getElementById("img-file").value = "";
     document.getElementById("img-preview").style.display = "none";
-    document.getElementById("upload-progress").style.display = "none";
-    document.getElementById("progress-bar").style.width = "0%";
+    document.getElementById("preview-error").style.display = "none";
   };
 
   // ── LOAD PROJECTS ──
@@ -711,7 +656,8 @@
       catch { snap = await getDocs(collection(db,"projects")); }
 
       const count = snap.docs.length;
-      document.getElementById("project-count-badge").textContent = `${count} project${count!==1?"s":""}`;
+      document.getElementById("project-count-badge").textContent =
+        `${count} project${count !== 1 ? "s" : ""}`;
 
       if (snap.empty) {
         list.innerHTML = `<div style="color:var(--muted);text-align:center;padding:3rem">No projects yet. Add your first one!</div>`;
@@ -719,10 +665,7 @@
       }
 
       list.innerHTML = "";
-      snap.docs.forEach(d => {
-        const p = { id: d.id, ...d.data() };
-        list.appendChild(buildRow(p));
-      });
+      snap.docs.forEach(d => list.appendChild(buildRow({ id: d.id, ...d.data() })));
     } catch(err) {
       list.innerHTML = `<div style="color:var(--red);padding:2rem">Error loading projects.</div>`;
     }
@@ -732,12 +675,10 @@
     const row = document.createElement("div");
     row.className = "project-row";
     row.id = "row-" + p.id;
-
     const emoji = { Web:"🌐", Android:"📱", AI:"🤖" }[p.category] || "🚀";
-
     row.innerHTML = `
       ${p.imageUrl
-        ? `<img src="${p.imageUrl}" alt="${p.title}"/>`
+        ? `<img src="${p.imageUrl}" alt="${p.title}" onerror="this.style.display='none'"/>`
         : `<div class="no-img">${emoji}</div>`}
       <div class="project-info">
         <div class="ptitle">${p.title || "Untitled"}</div>
@@ -754,7 +695,6 @@
   }
 
   // ── EDIT ──
-  let editData = {};
   window.openEdit = async (id) => {
     try {
       const snap = await getDocs(collection(db,"projects"));
@@ -762,14 +702,21 @@
       if (!d) return;
       const p = d.data();
       editingId = id;
-      editData = p;
-      document.getElementById("e-title").value    = p.title || "";
-      document.getElementById("e-desc").value     = p.description || "";
-      document.getElementById("e-category").value = p.category || "Web";
-      document.getElementById("e-tech").value     = (p.technologies||[]).join(", ");
-      document.getElementById("e-live").value     = p.liveUrl || "";
-      document.getElementById("e-github").value   = p.githubUrl || "";
-      document.getElementById("e-apk").value      = p.apkUrl || "";
+      document.getElementById("e-title").value      = p.title || "";
+      document.getElementById("e-desc").value       = p.description || "";
+      document.getElementById("e-category").value   = p.category || "Web";
+      document.getElementById("e-tech").value       = (p.technologies||[]).join(", ");
+      document.getElementById("e-live").value       = p.liveUrl || "";
+      document.getElementById("e-github").value     = p.githubUrl || "";
+      document.getElementById("e-apk").value        = p.apkUrl || "";
+      document.getElementById("e-image-url").value  = p.imageUrl || "";
+      // show existing image preview
+      if (p.imageUrl) {
+        document.getElementById("e-preview-img").src = p.imageUrl;
+        document.getElementById("e-img-preview").style.display = "block";
+      } else {
+        document.getElementById("e-img-preview").style.display = "none";
+      }
       document.getElementById("edit-modal").style.display = "flex";
     } catch(e) { showToast("Could not load project.", "error"); }
   };
@@ -785,13 +732,14 @@
       const tech = document.getElementById("e-tech").value
         .split(",").map(t => t.trim()).filter(Boolean);
       await updateDoc(doc(db,"projects",editingId), {
-        title:       document.getElementById("e-title").value.trim(),
-        description: document.getElementById("e-desc").value.trim(),
-        category:    document.getElementById("e-category").value,
+        title:        document.getElementById("e-title").value.trim(),
+        description:  document.getElementById("e-desc").value.trim(),
+        category:     document.getElementById("e-category").value,
         technologies: tech,
-        liveUrl:     document.getElementById("e-live").value.trim(),
-        githubUrl:   document.getElementById("e-github").value.trim(),
-        apkUrl:      document.getElementById("e-apk").value.trim(),
+        imageUrl:     document.getElementById("e-image-url").value.trim(),
+        liveUrl:      document.getElementById("e-live").value.trim(),
+        githubUrl:    document.getElementById("e-github").value.trim(),
+        apkUrl:       document.getElementById("e-apk").value.trim(),
       });
       showToast("✅ Project updated!", "success");
       closeEdit();
@@ -810,7 +758,7 @@
     } catch(err) { showToast("Error: " + err.message, "error"); }
   };
 
-  // ── LOAD VISITORS ──
+  // ── VISITORS ──
   async function loadVisitors() {
     const tbody = document.getElementById("visitors-tbody");
     tbody.innerHTML = `<tr><td colspan="6" class="loading-row">Loading visitors…</td></tr>`;
@@ -820,45 +768,31 @@
       catch { snap = await getDocs(collection(db,"visitors")); }
 
       const visitors = snap.docs.map(d => d.data());
-
-      // stats
       document.getElementById("stat-total").textContent   = visitors.length;
-      const mobile  = visitors.filter(v => v.device !== "Desktop").length;
-      const desktop = visitors.filter(v => v.device === "Desktop").length;
-      document.getElementById("stat-mobile").textContent  = mobile;
-      document.getElementById("stat-desktop").textContent = desktop;
+      document.getElementById("stat-mobile").textContent  = visitors.filter(v => v.device !== "Desktop").length;
+      document.getElementById("stat-desktop").textContent = visitors.filter(v => v.device === "Desktop").length;
 
       const today = new Date().toDateString();
-      const todayCount = visitors.filter(v => {
+      document.getElementById("stat-today").textContent = visitors.filter(v => {
         if (!v.visitedAt) return false;
         const d = v.visitedAt.toDate ? v.visitedAt.toDate() : new Date(v.visitedAt);
         return d.toDateString() === today;
       }).length;
-      document.getElementById("stat-today").textContent = todayCount;
 
-      if (visitors.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-row">No visitors yet. Share your portfolio!</td></tr>`;
+      if (!visitors.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-row">No visitors yet.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = "";
       visitors.forEach(v => {
-        const deviceIcon = {
-          "iPhone":"📱", "iPad":"📱", "Android Phone":"📱",
-          "Android Tablet":"📱", "Desktop":"🖥"
-        }[v.device] || "🖥";
-
-        const browserClass = {
-          Chrome:"badge-chrome", Firefox:"badge-firefox",
-          Safari:"badge-safari", Edge:"badge-edge"
-        }[v.browser] || "badge-other";
-
+        const deviceIcon = { "iPhone":"📱","iPad":"📱","Android Phone":"📱","Android Tablet":"📱","Desktop":"🖥" }[v.device] || "🖥";
+        const browserClass = { Chrome:"badge-chrome",Firefox:"badge-firefox",Safari:"badge-safari",Edge:"badge-edge" }[v.browser] || "badge-other";
         let timeStr = "—";
         if (v.visitedAt) {
           const d = v.visitedAt.toDate ? v.visitedAt.toDate() : new Date(v.visitedAt);
           timeStr = d.toLocaleString();
         }
-
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><span class="device-icon">${deviceIcon}</span>${v.device || "Unknown"}</td>
@@ -883,11 +817,9 @@
     setTimeout(() => { t.className = ""; }, 3500);
   };
 
-  // close modal on backdrop click
   document.getElementById("edit-modal").addEventListener("click", e => {
     if (e.target === document.getElementById("edit-modal")) closeEdit();
   });
 </script>
-
 </body>
 </html>
