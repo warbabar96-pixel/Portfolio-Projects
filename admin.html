@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WarTech Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #06080f;
+      --surface: #0d1017;
+      --card:    #111520;
+      --border:  #1c2235;
+      --accent:  #4f8ef7;
+      --accent2: #a78bfa;
+      --green:   #34d399;
+      --red:     #f87171;
+      --yellow:  #fbbf24;
+      --text:    #e8ecf8;
+      --muted:   #64748b;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── LOGIN SCREEN ── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg);
+    }
+    .login-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%; max-width: 360px;
+      text-align: center;
+    }
+    .login-box .logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 0.3rem;
+    }
+    .login-box .sub { color: var(--muted); font-size: 0.82rem; margin-bottom: 2rem; }
+    .login-box input {
+      width: 100%; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.7rem 1rem; color: var(--text);
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem;
+      outline: none; margin-bottom: 0.8rem;
+      transition: border-color 0.2s;
+    }
+    .login-box input:focus { border-color: var(--accent); }
+    .login-box input::placeholder { color: var(--muted); }
+    #login-error {
+      color: var(--red); font-size: 0.8rem;
+      margin-bottom: 0.8rem; display: none;
+    }
+    .btn-login {
+      width: 100%; padding: 0.75rem;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 8px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-login:hover { background: #3a7df0; }
+
+    /* ── ADMIN LAYOUT ── */
+    #admin-screen { display: none; }
+
+    .admin-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .admin-header .logo {
+      font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .admin-header .sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .btn-logout {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--muted); font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem; padding: 0.4rem 1rem; border-radius: 6px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── TABS ── */
+    .tabs {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex; gap: 0;
+    }
+    .tab-btn {
+      background: none; border: none; border-bottom: 2px solid transparent;
+      color: var(--muted); font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.88rem; font-weight: 500;
+      padding: 1rem 1.5rem; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── TAB CONTENT ── */
+    .tab-content { display: none; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+    .tab-content.active { display: block; }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 1.4rem; font-weight: 700; margin-bottom: 0.3rem;
+    }
+    .section-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .form-card h3 {
+      font-size: 1rem; font-weight: 600; margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .form-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group.full { grid-column: 1/-1; }
+    label {
+      font-size: 0.78rem; font-weight: 600; color: var(--muted);
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    input[type="text"], input[type="url"], textarea, select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.9rem;
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem;
+      outline: none; transition: border-color 0.2s; width: 100%;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+    textarea { resize: vertical; min-height: 90px; }
+    select option { background: var(--surface); }
+
+    /* image upload */
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .upload-area:hover { border-color: var(--accent); background: rgba(79,142,247,0.04); }
+    .upload-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .upload-area p { color: var(--muted); font-size: 0.85rem; }
+    .upload-area span { color: var(--accent); font-weight: 600; }
+    #img-preview {
+      margin-top: 1rem; display: none;
+    }
+    #img-preview img {
+      max-height: 160px; border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    /* progress */
+    .progress-wrap {
+      background: var(--surface); border-radius: 6px;
+      overflow: hidden; height: 6px; margin-top: 1rem; display: none;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      width: 0%; transition: width 0.3s;
+    }
+
+    /* form actions */
+    .form-actions { display: flex; gap: 0.8rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; font-weight: 600;
+      padding: 0.65rem 1.4rem; border-radius: 8px;
+      border: 1.5px solid transparent; cursor: pointer;
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-primary:hover { background: #3a7df0; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-ghost { background: transparent; color: var(--muted); border-color: var(--border); }
+    .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+    .btn-danger { background: transparent; color: var(--red); border-color: var(--red); }
+    .btn-danger:hover { background: rgba(248,113,113,0.1); }
+    .btn-edit { background: transparent; color: var(--yellow); border-color: var(--yellow); }
+    .btn-edit:hover { background: rgba(251,191,36,0.1); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text); padding: 0.75rem 1.5rem;
+      border-radius: 10px; font-size: 0.88rem; font-weight: 500;
+      opacity: 0; transition: all 0.3s; z-index: 999;
+      pointer-events: none; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.success { border-color: var(--green); color: var(--green); }
+    #toast.error { border-color: var(--red); color: var(--red); }
+
+    /* ── PROJECT LIST ── */
+    .project-list { display: flex; flex-direction: column; gap: 1rem; }
+    .project-row {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem 1.2rem;
+      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    }
+    .project-row img {
+      width: 70px; height: 48px; object-fit: cover;
+      border-radius: 6px; border: 1px solid var(--border); flex-shrink: 0;
+    }
+    .project-row .no-img {
+      width: 70px; height: 48px; border-radius: 6px;
+      background: var(--surface); display: flex; align-items: center;
+      justify-content: center; font-size: 1.4rem; flex-shrink: 0;
+    }
+    .project-info { flex: 1; min-width: 0; }
+    .project-info .ptitle { font-weight: 600; font-size: 0.95rem; }
+    .project-info .pdesc {
+      color: var(--muted); font-size: 0.8rem; margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 380px;
+    }
+    .project-info .pmeta {
+      font-size: 0.72rem; color: var(--accent);
+      font-family: 'JetBrains Mono', monospace; margin-top: 4px;
+    }
+    .row-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+    .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.78rem; border-radius: 6px; }
+
+    /* ── STATS ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.4rem;
+    }
+    .stat-card .slabel {
+      font-size: 0.72rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .stat-card .snum {
+      font-size: 2rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* visitors table */
+    .visitors-table {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+    }
+    .visitors-table table { width: 100%; border-collapse: collapse; }
+    .visitors-table th {
+      background: var(--surface);
+      font-size: 0.72rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 0.85rem 1rem; text-align: left;
+      font-family: 'JetBrains Mono', monospace;
+      border-bottom: 1px solid var(--border);
+    }
+    .visitors-table td {
+      padding: 0.85rem 1rem; font-size: 0.85rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .visitors-table tr:last-child td { border-bottom: none; }
+    .visitors-table tr:hover td { background: rgba(79,142,247,0.04); }
+    .device-icon { font-size: 1.1rem; margin-right: 0.4rem; }
+    .badge {
+      display: inline-block; font-size: 0.68rem; font-weight: 600;
+      padding: 0.18rem 0.55rem; border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .badge-chrome  { background: rgba(52,211,153,0.15); color: var(--green); }
+    .badge-firefox { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .badge-safari  { background: rgba(79,142,247,0.15); color: var(--accent); }
+    .badge-edge    { background: rgba(167,139,250,0.15); color: var(--accent2); }
+    .badge-other   { background: rgba(100,116,139,0.15); color: var(--muted); }
+    .time-cell { color: var(--muted); font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; }
+
+    .empty-row { text-align: center; padding: 3rem; color: var(--muted); }
+    .loading-row { text-align: center; padding: 2rem; color: var(--muted); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .tab-btn { padding: 0.8rem 1rem; font-size: 0.82rem; }
+      .tab-content { padding: 1.2rem; }
+      .admin-header { padding: 0 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="logo">WarTech</div>
+    <div class="sub">Admin Panel — WAR BABAR</div>
+    <input type="text" id="login-user" placeholder="Username" autocomplete="off"/>
+    <input type="password" id="login-pass" placeholder="Password"/>
+    <div id="login-error">Wrong username or password.</div>
+    <button class="btn-login" onclick="doLogin()">Login</button>
+  </div>
+</div>
+
+<!-- ══════════════ ADMIN ══════════════ -->
+<div id="admin-screen">
+
+  <!-- HEADER -->
+  <div class="admin-header">
+    <div>
+      <div class="logo">WarTech Admin</div>
+      <div class="sub">WAR BABAR — Portfolio CMS</div>
+    </div>
+    <div class="header-right">
+      <span style="font-size:0.8rem;color:var(--muted)" id="project-count-badge"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('add')">➕ Add Project</button>
+    <button class="tab-btn" onclick="switchTab('manage')">📁 Manage Projects</button>
+    <button class="tab-btn" onclick="switchTab('visitors')">👥 Visitors</button>
+  </div>
+
+  <!-- ── TAB: ADD PROJECT ── -->
+  <div class="tab-content active" id="tab-add">
+    <div class="section-title">Add New Project</div>
+    <div class="section-sub">Fill in the details below and publish to your portfolio homepage.</div>
+
+    <div class="form-card">
+      <h3>📷 Project Image</h3>
+      <div class="upload-area" id="upload-area">
+        <input type="file" id="img-file" accept="image/*" onchange="previewImg(this)"/>
+        <div class="upload-icon">🖼</div>
+        <p><span>Click to upload</span> or drag & drop</p>
+        <p style="margin-top:0.3rem;font-size:0.75rem">PNG, JPG, WEBP — max 5MB</p>
+      </div>
+      <div id="img-preview"><img id="preview-img" src="" alt="preview"/></div>
+      <div class="progress-wrap" id="upload-progress">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3>📝 Project Details</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Project Title *</label>
+          <input type="text" id="p-title" placeholder="e.g. Weather App"/>
+        </div>
+        <div class="form-group">
+          <label>Category *</label>
+          <select id="p-category">
+            <option value="">Select category</option>
+            <option value="Web">🌐 Web</option>
+            <option value="Android">📱 Android</option>
+            <option value="AI">🤖 AI</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Description *</label>
+          <textarea id="p-desc" placeholder="Brief description of what this project does..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Technologies Used</label>
+          <input type="text" id="p-tech" placeholder="e.g. HTML, CSS, JavaScript, Firebase (comma separated)"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3>🔗 Links</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Live Demo URL</label>
+          <input type="url" id="p-live" placeholder="https://yourapp.com"/>
+        </div>
+        <div class="form-group">
+          <label>GitHub URL</label>
+          <input type="url" id="p-github" placeholder="https://github.com/..."/>
+        </div>
+        <div class="form-group full">
+          <label>APK Download URL (Android only)</label>
+          <input type="url" id="p-apk" placeholder="https://drive.google.com/... or direct link"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" id="publish-btn" onclick="publishProject()">
+        🚀 Publish Project
+      </button>
+      <button class="btn btn-ghost" onclick="clearForm()">Clear Form</button>
+    </div>
+  </div>
+
+  <!-- ── TAB: MANAGE ── -->
+  <div class="tab-content" id="tab-manage">
+    <div class="section-title">Manage Projects</div>
+    <div class="section-sub">Edit or delete your existing projects.</div>
+    <div class="project-list" id="project-list">
+      <div style="color:var(--muted);text-align:center;padding:3rem">Loading projects…</div>
+    </div>
+  </div>
+
+  <!-- ── TAB: VISITORS ── -->
+  <div class="tab-content" id="tab-visitors">
+    <div class="section-title">Visitor Analytics</div>
+    <div class="section-sub">Everyone who has visited your homepage — their device, browser, and time.</div>
+
+    <div class="stats-grid" id="visitor-stats">
+      <div class="stat-card">
+        <div class="slabel">Total Visits</div>
+        <div class="snum" id="stat-total">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="slabel">Mobile Visitors</div>
+        <div class="snum" id="stat-mobile">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="slabel">Desktop Visitors</div>
+        <div class="snum" id="stat-desktop">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="slabel">Today's Visits</div>
+        <div class="snum" id="stat-today">—</div>
+      </div>
+    </div>
+
+    <div class="visitors-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Device</th>
+            <th>OS</th>
+            <th>Browser</th>
+            <th>Screen</th>
+            <th>Language</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody id="visitors-tbody">
+          <tr><td colspan="6" class="loading-row">Loading visitors…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /admin-screen -->
+
+<!-- EDIT MODAL -->
+<div id="edit-modal" style="
+  display:none; position:fixed; inset:0; z-index:200;
+  background:rgba(0,0,0,0.7); align-items:center; justify-content:center;
+">
+  <div style="
+    background:var(--card); border:1px solid var(--border);
+    border-radius:16px; padding:2rem; width:100%; max-width:560px;
+    max-height:90vh; overflow-y:auto; margin:1rem;
+  ">
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem">✏️ Edit Project</h3>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Title</label>
+      <input type="text" id="e-title"/>
+    </div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Category</label>
+      <select id="e-category">
+        <option value="Web">🌐 Web</option>
+        <option value="Android">📱 Android</option>
+        <option value="AI">🤖 AI</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Description</label>
+      <textarea id="e-desc"></textarea>
+    </div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Technologies (comma separated)</label>
+      <input type="text" id="e-tech"/>
+    </div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Live Demo URL</label>
+      <input type="url" id="e-live"/>
+    </div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>GitHub URL</label>
+      <input type="url" id="e-github"/>
+    </div>
+    <div class="form-group" style="margin-bottom:1.5rem">
+      <label>APK URL</label>
+      <input type="url" id="e-apk"/>
+    </div>
+    <div style="display:flex;gap:0.8rem">
+      <button class="btn btn-primary" onclick="saveEdit()">💾 Save Changes</button>
+      <button class="btn btn-ghost" onclick="closeEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ══════════════ FIREBASE ══════════════ -->
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc,
+           doc, serverTimestamp, query, orderBy }
+    from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytesResumable, getDownloadURL }
+    from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBFZYXN5MJ9WOMBXfCchUWnR9LEfOOzImw",
+    authDomain: "welkin-b3fee.firebaseapp.com",
+    projectId: "welkin-b3fee",
+    storageBucket: "welkin-b3fee.firebasestorage.app",
+    messagingSenderId: "45894924521",
+    appId: "1:45894924521:web:ab81de1a168022ba1d9878"
+  };
+
+  const app     = initializeApp(firebaseConfig);
+  const db      = getFirestore(app);
+  const storage = getStorage(app);
+
+  // ── CREDENTIALS (change these) ──
+  const ADMIN_USER = "warbabar";
+  const ADMIN_PASS = "wartech2025";
+
+  let editingId  = null;
+  let uploadedImageUrl = "";
+
+  // expose to window
+  window.doLogin = () => {
+    const u = document.getElementById("login-user").value.trim();
+    const p = document.getElementById("login-pass").value;
+    if (u === ADMIN_USER && p === ADMIN_PASS) {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("admin-screen").style.display = "block";
+      loadProjects();
+    } else {
+      document.getElementById("login-error").style.display = "block";
+    }
+  };
+
+  // enter key login
+  document.getElementById("login-pass").addEventListener("keydown", e => {
+    if (e.key === "Enter") window.doLogin();
+  });
+
+  window.logout = () => {
+    document.getElementById("admin-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+    document.getElementById("login-user").value = "";
+    document.getElementById("login-pass").value = "";
+  };
+
+  window.switchTab = (tab) => {
+    document.querySelectorAll(".tab-btn").forEach((b,i) => {
+      b.classList.toggle("active", ["add","manage","visitors"][i] === tab);
+    });
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+    document.getElementById(`tab-${tab}`).classList.add("active");
+    if (tab === "manage") loadProjects();
+    if (tab === "visitors") loadVisitors();
+  };
+
+  // ── IMAGE PREVIEW ──
+  window.previewImg = (input) => {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById("preview-img").src = e.target.result;
+      document.getElementById("img-preview").style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ── PUBLISH PROJECT ──
+  window.publishProject = async () => {
+    const title = document.getElementById("p-title").value.trim();
+    const desc  = document.getElementById("p-desc").value.trim();
+    const cat   = document.getElementById("p-category").value;
+
+    if (!title || !desc || !cat) {
+      showToast("Please fill in Title, Category and Description.", "error");
+      return;
+    }
+
+    const btn = document.getElementById("publish-btn");
+    btn.disabled = true;
+    btn.textContent = "Publishing…";
+
+    try {
+      let imageUrl = "";
+      const file = document.getElementById("img-file").files[0];
+
+      if (file) {
+        imageUrl = await uploadImage(file);
+      }
+
+      const tech = document.getElementById("p-tech").value
+        .split(",").map(t => t.trim()).filter(Boolean);
+
+      await addDoc(collection(db, "projects"), {
+        title,
+        description: desc,
+        category: cat,
+        technologies: tech,
+        imageUrl,
+        liveUrl:   document.getElementById("p-live").value.trim(),
+        githubUrl: document.getElementById("p-github").value.trim(),
+        apkUrl:    document.getElementById("p-apk").value.trim(),
+        createdAt: serverTimestamp()
+      });
+
+      showToast("✅ Project published successfully!", "success");
+      clearForm();
+      loadProjects();
+    } catch (err) {
+      showToast("Error: " + err.message, "error");
+    }
+
+    btn.disabled = false;
+    btn.textContent = "🚀 Publish Project";
+  };
+
+  function uploadImage(file) {
+    return new Promise((resolve, reject) => {
+      const storageRef = ref(storage, `projects/${Date.now()}_${file.name}`);
+      const task = uploadBytesResumable(storageRef, file);
+      const progressWrap = document.getElementById("upload-progress");
+      const progressBar  = document.getElementById("progress-bar");
+      progressWrap.style.display = "block";
+
+      task.on("state_changed",
+        snap => {
+          const pct = (snap.bytesTransferred / snap.totalBytes) * 100;
+          progressBar.style.width = pct + "%";
+        },
+        err => reject(err),
+        async () => {
+          const url = await getDownloadURL(task.snapshot.ref);
+          progressWrap.style.display = "none";
+          resolve(url);
+        }
+      );
+    });
+  }
+
+  window.clearForm = () => {
+    ["p-title","p-desc","p-tech","p-live","p-github","p-apk"]
+      .forEach(id => document.getElementById(id).value = "");
+    document.getElementById("p-category").value = "";
+    document.getElementById("img-file").value = "";
+    document.getElementById("img-preview").style.display = "none";
+    document.getElementById("upload-progress").style.display = "none";
+    document.getElementById("progress-bar").style.width = "0%";
+  };
+
+  // ── LOAD PROJECTS ──
+  async function loadProjects() {
+    const list = document.getElementById("project-list");
+    list.innerHTML = `<div style="color:var(--muted);text-align:center;padding:2rem">Loading…</div>`;
+    try {
+      let snap;
+      try { snap = await getDocs(query(collection(db,"projects"), orderBy("createdAt","desc"))); }
+      catch { snap = await getDocs(collection(db,"projects")); }
+
+      const count = snap.docs.length;
+      document.getElementById("project-count-badge").textContent = `${count} project${count!==1?"s":""}`;
+
+      if (snap.empty) {
+        list.innerHTML = `<div style="color:var(--muted);text-align:center;padding:3rem">No projects yet. Add your first one!</div>`;
+        return;
+      }
+
+      list.innerHTML = "";
+      snap.docs.forEach(d => {
+        const p = { id: d.id, ...d.data() };
+        list.appendChild(buildRow(p));
+      });
+    } catch(err) {
+      list.innerHTML = `<div style="color:var(--red);padding:2rem">Error loading projects.</div>`;
+    }
+  }
+
+  function buildRow(p) {
+    const row = document.createElement("div");
+    row.className = "project-row";
+    row.id = "row-" + p.id;
+
+    const emoji = { Web:"🌐", Android:"📱", AI:"🤖" }[p.category] || "🚀";
+
+    row.innerHTML = `
+      ${p.imageUrl
+        ? `<img src="${p.imageUrl}" alt="${p.title}"/>`
+        : `<div class="no-img">${emoji}</div>`}
+      <div class="project-info">
+        <div class="ptitle">${p.title || "Untitled"}</div>
+        <div class="pdesc">${p.description || ""}</div>
+        <div class="pmeta">${p.category || ""} ${p.technologies?.length ? "· " + p.technologies.slice(0,3).join(", ") : ""}</div>
+      </div>
+      <div class="row-actions">
+        ${p.liveUrl ? `<a href="${p.liveUrl}" target="_blank" class="btn btn-ghost btn-sm">🔗</a>` : ""}
+        <button class="btn btn-edit btn-sm" onclick="openEdit('${p.id}')">✏️ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProject('${p.id}')">🗑 Delete</button>
+      </div>
+    `;
+    return row;
+  }
+
+  // ── EDIT ──
+  let editData = {};
+  window.openEdit = async (id) => {
+    try {
+      const snap = await getDocs(collection(db,"projects"));
+      const d = snap.docs.find(d => d.id === id);
+      if (!d) return;
+      const p = d.data();
+      editingId = id;
+      editData = p;
+      document.getElementById("e-title").value    = p.title || "";
+      document.getElementById("e-desc").value     = p.description || "";
+      document.getElementById("e-category").value = p.category || "Web";
+      document.getElementById("e-tech").value     = (p.technologies||[]).join(", ");
+      document.getElementById("e-live").value     = p.liveUrl || "";
+      document.getElementById("e-github").value   = p.githubUrl || "";
+      document.getElementById("e-apk").value      = p.apkUrl || "";
+      document.getElementById("edit-modal").style.display = "flex";
+    } catch(e) { showToast("Could not load project.", "error"); }
+  };
+
+  window.closeEdit = () => {
+    document.getElementById("edit-modal").style.display = "none";
+    editingId = null;
+  };
+
+  window.saveEdit = async () => {
+    if (!editingId) return;
+    try {
+      const tech = document.getElementById("e-tech").value
+        .split(",").map(t => t.trim()).filter(Boolean);
+      await updateDoc(doc(db,"projects",editingId), {
+        title:       document.getElementById("e-title").value.trim(),
+        description: document.getElementById("e-desc").value.trim(),
+        category:    document.getElementById("e-category").value,
+        technologies: tech,
+        liveUrl:     document.getElementById("e-live").value.trim(),
+        githubUrl:   document.getElementById("e-github").value.trim(),
+        apkUrl:      document.getElementById("e-apk").value.trim(),
+      });
+      showToast("✅ Project updated!", "success");
+      closeEdit();
+      loadProjects();
+    } catch(err) { showToast("Error: " + err.message, "error"); }
+  };
+
+  // ── DELETE ──
+  window.deleteProject = async (id) => {
+    if (!confirm("Delete this project? This cannot be undone.")) return;
+    try {
+      await deleteDoc(doc(db,"projects",id));
+      document.getElementById("row-"+id)?.remove();
+      showToast("🗑 Project deleted.", "success");
+      loadProjects();
+    } catch(err) { showToast("Error: " + err.message, "error"); }
+  };
+
+  // ── LOAD VISITORS ──
+  async function loadVisitors() {
+    const tbody = document.getElementById("visitors-tbody");
+    tbody.innerHTML = `<tr><td colspan="6" class="loading-row">Loading visitors…</td></tr>`;
+    try {
+      let snap;
+      try { snap = await getDocs(query(collection(db,"visitors"), orderBy("visitedAt","desc"))); }
+      catch { snap = await getDocs(collection(db,"visitors")); }
+
+      const visitors = snap.docs.map(d => d.data());
+
+      // stats
+      document.getElementById("stat-total").textContent   = visitors.length;
+      const mobile  = visitors.filter(v => v.device !== "Desktop").length;
+      const desktop = visitors.filter(v => v.device === "Desktop").length;
+      document.getElementById("stat-mobile").textContent  = mobile;
+      document.getElementById("stat-desktop").textContent = desktop;
+
+      const today = new Date().toDateString();
+      const todayCount = visitors.filter(v => {
+        if (!v.visitedAt) return false;
+        const d = v.visitedAt.toDate ? v.visitedAt.toDate() : new Date(v.visitedAt);
+        return d.toDateString() === today;
+      }).length;
+      document.getElementById("stat-today").textContent = todayCount;
+
+      if (visitors.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-row">No visitors yet. Share your portfolio!</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = "";
+      visitors.forEach(v => {
+        const deviceIcon = {
+          "iPhone":"📱", "iPad":"📱", "Android Phone":"📱",
+          "Android Tablet":"📱", "Desktop":"🖥"
+        }[v.device] || "🖥";
+
+        const browserClass = {
+          Chrome:"badge-chrome", Firefox:"badge-firefox",
+          Safari:"badge-safari", Edge:"badge-edge"
+        }[v.browser] || "badge-other";
+
+        let timeStr = "—";
+        if (v.visitedAt) {
+          const d = v.visitedAt.toDate ? v.visitedAt.toDate() : new Date(v.visitedAt);
+          timeStr = d.toLocaleString();
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><span class="device-icon">${deviceIcon}</span>${v.device || "Unknown"}</td>
+          <td>${v.os || "Unknown"}</td>
+          <td><span class="badge ${browserClass}">${v.browser || "Unknown"}</span></td>
+          <td style="color:var(--muted);font-size:0.78rem;font-family:'JetBrains Mono',monospace">${v.screen || "—"}</td>
+          <td style="color:var(--muted);font-size:0.8rem">${v.language || "—"}</td>
+          <td class="time-cell">${timeStr}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch(err) {
+      tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red);padding:2rem;text-align:center">Error loading visitors.</td></tr>`;
+    }
+  }
+
+  // ── TOAST ──
+  window.showToast = (msg, type="success") => {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = `show ${type}`;
+    setTimeout(() => { t.className = ""; }, 3500);
+  };
+
+  // close modal on backdrop click
+  document.getElementById("edit-modal").addEventListener("click", e => {
+    if (e.target === document.getElementById("edit-modal")) closeEdit();
+  });
+</script>
+
+</body>
+</html>
