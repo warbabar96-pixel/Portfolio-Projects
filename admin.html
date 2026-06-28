@@ -299,7 +299,7 @@
   <div class="login-box">
     <div class="logo">WarTech</div>
     <div class="sub">Admin Panel — WAR BABAR</div>
-    <input type="text" id="login-user" placeholder="Username" autocomplete="off"/>
+    <input type="email" id="login-user" placeholder="Email" autocomplete="off"/>
     <input type="password" id="login-pass" placeholder="Password"/>
     <div id="login-error">Wrong username or password.</div>
     <button class="btn-login" onclick="doLogin()">Login</button>
@@ -510,6 +510,7 @@
   import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc,
            doc, serverTimestamp, query, orderBy }
     from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBFZYXN5MJ9WOMBXfCchUWnR9LEfOOzImw",
@@ -522,21 +523,27 @@
 
   const app = initializeApp(firebaseConfig);
   const db  = getFirestore(app);
+  const auth = getAuth(app);
 
-  const ADMIN_USER = "war";
-  const ADMIN_PASS = "1";
 
-  let editingId = null;
-
-  // ── LOGIN ──
-  window.doLogin = () => {
-    const u = document.getElementById("login-user").value.trim();
-    const p = document.getElementById("login-pass").value;
-    if (u === ADMIN_USER && p === ADMIN_PASS) {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
       document.getElementById("login-screen").style.display = "none";
       document.getElementById("admin-screen").style.display = "block";
       loadProjects();
     } else {
+      document.getElementById("login-screen").style.display = "flex";
+      document.getElementById("admin-screen").style.display = "none";
+    }
+  });
+
+  window.doLogin = async () => {
+    const email = document.getElementById("login-user").value.trim();
+    const password = document.getElementById("login-pass").value;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      document.getElementById("login-error").style.display = "none";
+    } catch(e) {
       document.getElementById("login-error").style.display = "block";
     }
   };
@@ -545,7 +552,8 @@
     if (e.key === "Enter") window.doLogin();
   });
 
-  window.logout = () => {
+  window.logout = async () => {
+    await signOut(auth);
     document.getElementById("admin-screen").style.display = "none";
     document.getElementById("login-screen").style.display = "flex";
     document.getElementById("login-user").value = "";
