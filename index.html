@@ -4,17 +4,74 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>WAR BABAR — WarTech</title>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
   <style>
+    /* ── MAINTENANCE OVERLAY ── */
+    #maintenance-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      background: #0a0a0f;
+      display: none; /* shown by JS when maintenance enabled */
+      align-items: center; justify-content: center;
+      flex-direction: column; text-align: center;
+      padding: 2rem;
+      color: #f5e9f0;
+      font-family: 'Space Grotesk', sans-serif;
+      background-image:
+        radial-gradient(circle at 50% 20%, rgba(255,45,106,0.12) 0%, transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(255,110,199,0.08) 0%, transparent 60%);
+    }
+    #maintenance-overlay .logo-circle {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff2d6a, #ff6ec7);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem; color: #fff;
+      box-shadow: 0 0 60px rgba(255,45,106,0.5);
+      animation: float 3s ease-in-out infinite;
+      margin-bottom: 2rem;
+    }
+    #maintenance-overlay h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #ff2d6a, #ff6ec7);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+    #maintenance-overlay p {
+      font-size: 1.2rem;
+      color: rgba(255,255,255,0.8);
+      max-width: 600px;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+    #maintenance-overlay .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top-color: #ff6ec7;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%     { transform: translateY(-15px); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Your existing site styles (unchanged) ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --accent:  #4f8ef7;
-      --accent2: #a78bfa;
+      --accent:  #ff2d6a;
+      --accent2: #ff6ec7;
       --green:   #34d399;
       --text:    #e8ecf8;
       --muted:   #8899bb;
-      --glow:    rgba(79,142,247,0.2);
+      --glow:    rgba(255,45,106,0.2);
     }
 
     html { scroll-behavior: smooth; }
@@ -114,7 +171,7 @@
       cursor: pointer; transition: all 0.22s; white-space: nowrap;
     }
     .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .btn-primary:hover { background: #3a7df0; transform: translateY(-1px); }
+    .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
     .btn-outline { background: transparent; color: #fff; border-color: rgba(255,255,255,0.3); }
     .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
 
@@ -158,7 +215,7 @@
     .skills-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .skill-pill {
       background: transparent;
-      border: 1px solid rgba(79,142,247,0.5);
+      border: 1px solid rgba(255,45,106,0.5);
       color: var(--accent);
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.73rem; font-weight: 600;
@@ -166,7 +223,7 @@
       transition: all 0.2s;
     }
     .skill-pill:hover {
-      background: rgba(79,142,247,0.12);
+      background: rgba(255,45,106,0.12);
       border-color: var(--accent);
       color: #fff;
     }
@@ -199,7 +256,7 @@
     .card:hover {
       transform: translateY(-5px);
       box-shadow: 0 16px 48px var(--glow);
-      border-color: rgba(79,142,247,0.5);
+      border-color: rgba(255,45,106,0.5);
     }
     .card-img-wrap { position: relative; }
     .card-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
@@ -222,7 +279,7 @@
 
     .btn-sm { font-size: 0.78rem; padding: 0.38rem 0.85rem; border-radius: 6px; }
     .btn-demo { background: var(--accent); color: #fff; border: none; }
-    .btn-demo:hover { background: #3a7df0; }
+    .btn-demo:hover { background: var(--accent2); }
     .btn-gh { background: transparent; color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.2); }
     .btn-gh:hover { color: #fff; border-color: var(--accent); }
     .btn-apk { background: transparent; color: var(--green); border: 1px solid var(--green); }
@@ -275,16 +332,16 @@
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       border: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 20px rgba(79,142,247,0.5);
+      box-shadow: 0 4px 20px rgba(255,45,106,0.5);
       color: #fff; font-size: 1.2rem;
       transition: transform 0.2s, box-shadow 0.2s;
     }
     #music-btn:hover { transform: scale(1.1); }
     #music-btn.playing { animation: pulse-ring 2s ease-out infinite; }
     @keyframes pulse-ring {
-      0%   { box-shadow: 0 0 0 0 rgba(79,142,247,0.6); }
-      70%  { box-shadow: 0 0 0 14px rgba(79,142,247,0); }
-      100% { box-shadow: 0 0 0 0 rgba(79,142,247,0); }
+      0%   { box-shadow: 0 0 0 0 rgba(255,45,106,0.6); }
+      70%  { box-shadow: 0 0 0 14px rgba(255,45,106,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,45,106,0); }
     }
 
     #music-popup {
@@ -341,6 +398,17 @@
 </head>
 <body>
 
+<!-- MAINTENANCE OVERLAY (hidden by default) -->
+<div id="maintenance-overlay">
+  <div class="logo-circle">
+    <i class="fa-solid fa-gear"></i> <!-- or fa-wrench, fa-warning, etc. -->
+  </div>
+  <h1>Maintenance Mode</h1>
+  <p id="maintenance-message-text">We're currently down for maintenance. Please check back soon!</p>
+  <div class="spinner"></div>
+</div>
+
+<!-- Your existing site content -->
 <div class="video-bg">
   <video autoplay muted loop playsinline>
     <source src="your-video.mp4" type="video/mp4">
@@ -348,7 +416,6 @@
 </div>
 
 <div class="site-wrap">
-
   <!-- NAV -->
   <nav>
     <div class="nav-logo">
@@ -373,29 +440,24 @@
     </p>
     <div class="hero-actions">
       <a href="#projects" class="btn btn-primary">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        View Projects
+        <i class="fa-solid fa-grid-2"></i> View Projects
       </a>
       <a href="#contact" class="btn btn-outline">Contact Me</a>
     </div>
 
-    <!-- SOCIAL ROW — all links filled in -->
+    <!-- SOCIAL ROW -->
     <div class="social-row">
       <a href="https://github.com/warbabar96-pixel/" class="social-link" target="_blank">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        GitHub
+        <i class="fa-brands fa-github"></i> GitHub
       </a>
       <a href="https://www.linkedin.com/in/war-babar-70144b287?utm_source=share_via&utm_content=profile&utm_medium=member_android" class="social-link" target="_blank">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-        LinkedIn
+        <i class="fa-brands fa-linkedin-in"></i> LinkedIn
       </a>
       <a href="https://www.instagram.com/war_babar?igsh=bDh6Zm1lejNjdWFs" class="social-link" target="_blank">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-        Instagram
+        <i class="fa-brands fa-instagram"></i> Instagram
       </a>
       <a href="mailto:warbabar96@gmail.com" class="social-link">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        Email
+        <i class="fa-solid fa-envelope"></i> Email
       </a>
     </div>
   </section>
@@ -459,7 +521,7 @@
         <span>Loading projects…</span>
       </div>
       <div class="empty-state" id="empty">
-        <div style="font-size:3rem;margin-bottom:0.8rem">🚀</div>
+        <div style="font-size:3rem;margin-bottom:0.8rem"><i class="fa-solid fa-rocket"></i></div>
         <p>Projects coming soon.</p>
       </div>
     </div>
@@ -472,20 +534,16 @@
     <p>Have a project idea or want to collaborate? Let's talk.</p>
     <div class="contact-links">
       <a href="mailto:warbabar96@gmail.com" class="contact-link">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        Email
+        <i class="fa-solid fa-envelope"></i> Email
       </a>
       <a href="https://github.com/warbabar96-pixel/" class="contact-link" target="_blank">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        GitHub
+        <i class="fa-brands fa-github"></i> GitHub
       </a>
       <a href="https://www.linkedin.com/in/war-babar-70144b287?utm_source=share_via&utm_content=profile&utm_medium=member_android" class="contact-link" target="_blank">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-        LinkedIn
+        <i class="fa-brands fa-linkedin-in"></i> LinkedIn
       </a>
       <a href="https://www.instagram.com/war_babar?igsh=bDh6Zm1lejNjdWFs" class="contact-link" target="_blank">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-        Instagram
+        <i class="fa-brands fa-instagram"></i> Instagram
       </a>
     </div>
   </section>
@@ -519,7 +577,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, query, orderBy, addDoc, serverTimestamp }
+  import { getFirestore, collection, getDocs, query, orderBy, addDoc, serverTimestamp, doc, getDoc }
     from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -534,6 +592,27 @@
   const app = initializeApp(firebaseConfig);
   const db  = getFirestore(app);
 
+  // ── MAINTENANCE CHECK ──
+  async function checkMaintenanceMode() {
+    try {
+      const docRef = doc(db, "settings", "maintenance");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.enabled) {
+          document.getElementById("maintenance-overlay").style.display = "flex";
+          document.getElementById("maintenance-message-text").textContent =
+            data.message || "We're currently down for maintenance. Please check back soon!";
+          return true; // maintenance active, stop loading normal content
+        }
+      }
+    } catch (e) {
+      console.warn("Maintenance check failed, continuing normally", e);
+    }
+    return false;
+  }
+
+  // Load projects only if not in maintenance
   async function loadProjects() {
     const grid  = document.getElementById("projects-grid");
     const empty = document.getElementById("empty");
@@ -577,16 +656,14 @@
     card.appendChild(body);
     const foot = document.createElement("div");
     foot.className = "card-footer";
-    if (p.liveUrl)   foot.innerHTML += `<a class="btn btn-sm btn-demo" href="${p.liveUrl}" target="_blank">🔗 Live Demo</a>`;
-    if (p.githubUrl) foot.innerHTML += `<a class="btn btn-sm btn-gh" href="${p.githubUrl}" target="_blank">GitHub</a>`;
-    if (p.apkUrl)    foot.innerHTML += `<a class="btn btn-sm btn-apk" href="${p.apkUrl}" target="_blank" download>⬇ APK</a>`;
+    if (p.liveUrl)   foot.innerHTML += `<a class="btn btn-sm btn-demo" href="${p.liveUrl}" target="_blank"><i class="fa-solid fa-link"></i> Live Demo</a>`;
+    if (p.githubUrl) foot.innerHTML += `<a class="btn btn-sm btn-gh" href="${p.githubUrl}" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>`;
+    if (p.apkUrl)    foot.innerHTML += `<a class="btn btn-sm btn-apk" href="${p.apkUrl}" target="_blank" download><i class="fa-solid fa-download"></i> APK</a>`;
     card.appendChild(foot);
     return card;
   }
 
-  loadProjects();
-
-  // ── VISITOR ID (persists across visits on this browser) ──
+  // ── VISITOR TRACKING (unchanged from your original) ──
   function getVisitorId() {
     let id = localStorage.getItem("wt_vid");
     if (!id) {
@@ -595,8 +672,6 @@
     }
     return id;
   }
-
-  // ── SESSION ID (new per tab/session, used to avoid double-logging one visit) ──
   function getSessionId() {
     let sid = sessionStorage.getItem("wt_sid");
     if (!sid) {
@@ -605,13 +680,18 @@
     }
     return sid;
   }
-
+  function getPhoneModel(ua) {
+    if (!/Android/i.test(ua)) return null;
+    const m = ua.match(/Android\s+[\d.]+;\s*([^;)]+?)\s*(?:Build\/|\))/i);
+    if (!m || !m[1]) return null;
+    let model = m[1].trim();
+    if (!model || model.length < 2 || /^(K|wv|Mobile)$/i.test(model)) return null;
+    return model;
+  }
   (async () => {
     try {
-      // only log once per browser session/tab
       if (sessionStorage.getItem("wt_logged")) return;
       sessionStorage.setItem("wt_logged", "1");
-
       const ua = navigator.userAgent;
       let device = "Desktop";
       if (/iPhone/i.test(ua)) device = "iPhone";
@@ -636,17 +716,17 @@
       const sessionId  = getSessionId();
       const isReturning = localStorage.getItem("wt_seen_before") === "1";
       localStorage.setItem("wt_seen_before", "1");
+      const model = getPhoneModel(ua);
 
-      // IP + rough geo/ISP lookup (best-effort, never blocks logging)
       let geo = {};
       try {
         const res = await fetch("https://ipapi.co/json/");
         if (res.ok) geo = await res.json();
-      } catch (e) { /* geo lookup failed, continue without it */ }
+      } catch (e) {}
 
       await addDoc(collection(db,"visitors"), {
         visitorId, sessionId, isReturning,
-        device, browser, os,
+        device, browser, os, model,
         screen: `${screen.width}x${screen.height}`,
         language: navigator.language || "unknown",
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown",
@@ -661,6 +741,7 @@
     } catch(e) {}
   })();
 
+  // ── MUSIC PLAYER (unchanged) ──
   const audio   = document.getElementById("bg-music");
   const btn     = document.getElementById("music-btn");
   const popup   = document.getElementById("music-popup");
@@ -698,6 +779,15 @@
       setTimeout(() => { if (!playing) popup.classList.remove("show"); }, 2500);
     }
   });
+
+  // ── INIT ──
+  (async () => {
+    const maintenanceActive = await checkMaintenanceMode();
+    if (!maintenanceActive) {
+      loadProjects();
+      // You may also want to start music etc., but they can remain.
+    }
+  })();
 </script>
 </body>
 </html>
