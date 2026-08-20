@@ -20,6 +20,8 @@
       --yellow:  #fbbf24;
       --text:    #e8ecf8;
       --muted:   #64748b;
+      --lg-red:  #ff2d6a;
+      --lg-pink: #ff6ec7;
     }
 
     body {
@@ -29,43 +31,147 @@
       min-height: 100vh;
     }
 
-    /* ── LOGIN ── */
+    /* ── LOGIN (red/pink glow theme) ── */
     #login-screen {
       min-height: 100vh;
       display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      background: radial-gradient(circle at 50% 20%, #1a0510 0%, #06080f 60%);
+    }
+    #login-screen::before, #login-screen::after {
+      content: ''; position: absolute; border-radius: 50%;
+      filter: blur(80px); opacity: 0.35; z-index: 0;
+      animation: loginFloat 8s ease-in-out infinite alternate;
+    }
+    #login-screen::before {
+      width: 380px; height: 380px; background: var(--lg-red);
+      top: -80px; left: -80px;
+    }
+    #login-screen::after {
+      width: 420px; height: 420px; background: var(--lg-pink);
+      bottom: -100px; right: -100px;
+      animation-delay: 2s;
+    }
+    @keyframes loginFloat {
+      0%   { transform: translate(0,0) scale(1); }
+      100% { transform: translate(30px,-20px) scale(1.15); }
     }
     .login-box {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 2.5rem;
+      position: relative; z-index: 1;
+      background: rgba(17,10,16,0.75); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,110,199,0.35);
+      border-radius: 18px; padding: 2.6rem;
       width: 100%; max-width: 360px; text-align: center;
+      box-shadow: 0 0 25px rgba(255,45,106,0.25), 0 0 60px rgba(255,110,199,0.12);
+      animation: loginGlowPulse 3.2s ease-in-out infinite;
+    }
+    @keyframes loginGlowPulse {
+      0%, 100% { box-shadow: 0 0 25px rgba(255,45,106,0.25), 0 0 60px rgba(255,110,199,0.12); }
+      50%      { box-shadow: 0 0 40px rgba(255,45,106,0.45), 0 0 90px rgba(255,110,199,0.25); }
     }
     .login-box .logo {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1.4rem; font-weight: 700;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      font-size: 1.5rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--lg-red), var(--lg-pink));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.5rem;
     }
-    .login-box .sub { color: var(--muted); font-size: 0.82rem; margin-bottom: 2rem; }
+    .login-box .sub {
+      color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-bottom: 1.7rem;
+      min-height: 1.2rem; font-family: 'JetBrains Mono', monospace;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .login-box .sub .typed-cursor {
+      display: inline-block; width: 2px; height: 0.9rem; background: var(--lg-pink);
+      margin-left: 2px; animation: blinkCursor 0.9s step-end infinite;
+    }
+    @keyframes blinkCursor { 50% { opacity: 0; } }
     .login-box input {
-      width: 100%; background: var(--surface);
-      border: 1px solid var(--border); border-radius: 8px;
-      padding: 0.7rem 1rem; color: var(--text);
+      width: 100%; background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,110,199,0.25); border-radius: 10px;
+      padding: 0.75rem 1rem; color: var(--text);
       font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem;
-      outline: none; margin-bottom: 0.8rem; transition: border-color 0.2s;
+      outline: none; margin-bottom: 0.8rem; transition: all 0.25s;
     }
-    .login-box input:focus { border-color: var(--accent); }
+    .login-box input:focus {
+      border-color: var(--lg-pink);
+      box-shadow: 0 0 0 3px rgba(255,110,199,0.15);
+    }
     .login-box input::placeholder { color: var(--muted); }
-    #login-error { color: var(--red); font-size: 0.8rem; margin-bottom: 0.8rem; display: none; }
+    #login-error { color: var(--lg-red); font-size: 0.8rem; margin-bottom: 0.8rem; display: none; }
     .btn-login {
-      width: 100%; padding: 0.75rem;
-      background: var(--accent); color: #fff;
-      border: none; border-radius: 8px;
+      width: 100%; padding: 0.8rem;
+      background: linear-gradient(135deg, var(--lg-red), var(--lg-pink));
+      color: #fff; border: none; border-radius: 10px;
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.95rem; font-weight: 600;
-      cursor: pointer; transition: background 0.2s;
+      font-size: 0.95rem; font-weight: 700; letter-spacing: 0.02em;
+      cursor: pointer; transition: all 0.25s;
+      box-shadow: 0 4px 18px rgba(255,45,106,0.35);
     }
-    .btn-login:hover { background: #3a7df0; }
+    .btn-login:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 26px rgba(255,45,106,0.5);
+    }
+
+    /* ── HAMBURGER / DRAWER ── */
+    .btn-hamburger {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text); width: 40px; height: 40px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s; font-size: 1.15rem; flex-shrink: 0;
+    }
+    .btn-hamburger:hover { border-color: var(--lg-pink); color: var(--lg-pink); }
+
+    #drawer-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      z-index: 300; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    #drawer-overlay.open { opacity: 1; pointer-events: auto; }
+
+    #drawer {
+      position: fixed; top: 0; right: 0; height: 100vh; width: 280px; max-width: 82vw;
+      background: var(--surface); border-left: 1px solid var(--border);
+      z-index: 301; transform: translateX(100%); transition: transform 0.3s ease;
+      display: flex; flex-direction: column; padding: 1.4rem 1.1rem;
+      box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+    }
+    #drawer.open { transform: translateX(0); }
+    .drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+    }
+    .drawer-header .logo {
+      font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--lg-red), var(--lg-pink));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .drawer-close {
+      background: none; border: none; color: var(--muted);
+      font-size: 1.3rem; cursor: pointer; line-height: 1;
+    }
+    .drawer-close:hover { color: var(--text); }
+    .drawer-nav { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; }
+    .drawer-item {
+      display: flex; align-items: center; gap: 0.7rem;
+      background: none; border: 1px solid transparent;
+      color: var(--muted); text-align: left; width: 100%;
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; font-weight: 500;
+      padding: 0.75rem 0.9rem; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .drawer-item:hover { background: rgba(255,110,199,0.06); color: var(--text); }
+    .drawer-item.active {
+      background: rgba(255,45,106,0.1);
+      border-color: rgba(255,110,199,0.3);
+      color: var(--lg-pink);
+    }
+    .drawer-footer { border-top: 1px solid var(--border); padding-top: 1rem; }
+    .drawer-logout {
+      width: 100%; background: transparent; border: 1px solid var(--border);
+      color: var(--muted); font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem; padding: 0.65rem; border-radius: 8px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .drawer-logout:hover { border-color: var(--lg-red); color: var(--lg-red); }
 
     /* ── ADMIN LAYOUT ── */
     #admin-screen { display: none; }
@@ -90,20 +196,6 @@
       cursor: pointer; transition: all 0.2s;
     }
     .btn-logout:hover { border-color: var(--red); color: var(--red); }
-
-    /* ── TABS ── */
-    .tabs {
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 0 2rem; display: flex;
-    }
-    .tab-btn {
-      background: none; border: none; border-bottom: 2px solid transparent;
-      color: var(--muted); font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.88rem; font-weight: 500;
-      padding: 1rem 1.5rem; cursor: pointer; transition: all 0.2s;
-    }
-    .tab-btn:hover { color: var(--text); }
-    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
     .tab-content { display: none; padding: 2rem; max-width: 1100px; margin: 0 auto; }
     .tab-content.active { display: block; }
@@ -315,7 +407,7 @@
 <div id="login-screen">
   <div class="login-box">
     <div class="logo">WarTech</div>
-    <div class="sub">Admin Panel — WAR BABAR</div>
+    <div class="sub"><span id="typed-text"></span><span class="typed-cursor"></span></div>
     <input type="email" id="login-user" placeholder="Email" autocomplete="off"/>
     <input type="password" id="login-pass" placeholder="Password"/>
     <div id="login-error">Wrong username or password.</div>
@@ -333,14 +425,24 @@
     </div>
     <div class="header-right">
       <span style="font-size:0.8rem;color:var(--muted)" id="project-count-badge"></span>
-      <button class="btn-logout" onclick="logout()">Logout</button>
+      <button class="btn-hamburger" onclick="toggleDrawer()" aria-label="Menu">☰</button>
     </div>
   </div>
 
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('add')">➕ Add Project</button>
-    <button class="tab-btn" onclick="switchTab('manage')">📁 Manage Projects</button>
-    <button class="tab-btn" onclick="switchTab('visitors')">👥 Visitors</button>
+  <div id="drawer-overlay" onclick="toggleDrawer(false)"></div>
+  <div id="drawer">
+    <div class="drawer-header">
+      <span class="logo">WarTech</span>
+      <button class="drawer-close" onclick="toggleDrawer(false)" aria-label="Close">✕</button>
+    </div>
+    <div class="drawer-nav">
+      <button class="drawer-item active" data-tab="add" onclick="switchTab('add')">➕ Add Project</button>
+      <button class="drawer-item" data-tab="manage" onclick="switchTab('manage')">📁 Manage Projects</button>
+      <button class="drawer-item" data-tab="visitors" onclick="switchTab('visitors')">👥 Visitors</button>
+    </div>
+    <div class="drawer-footer">
+      <button class="drawer-logout" onclick="logout()">🚪 Logout</button>
+    </div>
   </div>
 
   <!-- TAB: ADD -->
@@ -588,14 +690,56 @@
   };
 
   window.switchTab = (tab) => {
-    document.querySelectorAll(".tab-btn").forEach((b, i) => {
-      b.classList.toggle("active", ["add","manage","visitors"][i] === tab);
+    document.querySelectorAll(".drawer-item").forEach(b => {
+      b.classList.toggle("active", b.dataset.tab === tab);
     });
     document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
     document.getElementById(`tab-${tab}`).classList.add("active");
     if (tab === "manage") loadProjects();
     if (tab === "visitors") loadVisitors();
+    toggleDrawer(false);
   };
+
+  window.toggleDrawer = (force) => {
+    const drawer = document.getElementById("drawer");
+    const overlay = document.getElementById("drawer-overlay");
+    const open = typeof force === "boolean" ? force : !drawer.classList.contains("open");
+    drawer.classList.toggle("open", open);
+    overlay.classList.toggle("open", open);
+  };
+
+  // ── LOGIN SCREEN AUTO-TYPE ANIMATION ──
+  (function typeLoop() {
+    const phrases = ["Admin Panel — WAR BABAR", "Secure Access Only", "WarTech Systems"];
+    const el = document.getElementById("typed-text");
+    if (!el) return;
+    let pIdx = 0, cIdx = 0, deleting = false;
+
+    function tick() {
+      const phrase = phrases[pIdx];
+      if (!deleting) {
+        cIdx++;
+        el.textContent = phrase.slice(0, cIdx);
+        if (cIdx === phrase.length) {
+          deleting = true;
+          setTimeout(tick, 1400);
+          return;
+        }
+        setTimeout(tick, 55);
+      } else {
+        cIdx--;
+        el.textContent = phrase.slice(0, cIdx);
+        if (cIdx === 0) {
+          deleting = false;
+          pIdx = (pIdx + 1) % phrases.length;
+          setTimeout(tick, 400);
+          return;
+        }
+        setTimeout(tick, 28);
+      }
+    }
+    tick();
+  })();
 
   // ── IMAGE URL PREVIEW ──
   window.onImageUrlInput = () => {
@@ -838,6 +982,7 @@
   function visitorRowHTML(v, extraBadge) {
     const deviceIcon = { "iPhone":"📱","iPad":"📱","Android Phone":"📱","Android Tablet":"📱","Desktop":"🖥" }[v.device] || "🖥";
     const browserClass = { Chrome:"badge-chrome",Firefox:"badge-firefox",Safari:"badge-safari",Edge:"badge-edge" }[v.browser] || "badge-other";
+    const deviceLabel = v.model || v.device || "Unknown";
     let timeStr = "—";
     if (v.visitedAt) {
       const d = v.visitedAt.toDate ? v.visitedAt.toDate() : new Date(v.visitedAt);
@@ -846,7 +991,7 @@
     const referrer = !v.referrer || v.referrer === "Direct" ? "Direct" :
       (() => { try { return new URL(v.referrer).hostname; } catch { return v.referrer; } })();
     return `
-      <td><span class="device-icon">${deviceIcon}</span>${v.device || "Unknown"}${extraBadge || (v.isReturning ? '<span class="badge-returning">Returning</span>' : "")}</td>
+      <td><span class="device-icon">${deviceIcon}</span>${deviceLabel}${extraBadge || (v.isReturning ? '<span class="badge-returning">Returning</span>' : "")}</td>
       <td>${v.os || "Unknown"}</td>
       <td><span class="badge ${browserClass}">${v.browser || "Unknown"}</span></td>
       <td>${fmtLocation(v)}</td>
@@ -864,7 +1009,7 @@
     let visitors = allVisitors;
     if (filterVal) {
       visitors = visitors.filter(v => {
-        const hay = [v.city, v.region, v.country, v.isp, v.device, v.os, v.browser, v.referrer, v.ip]
+        const hay = [v.city, v.region, v.country, v.isp, v.device, v.model, v.os, v.browser, v.referrer, v.ip]
           .filter(Boolean).join(" ").toLowerCase();
         return hay.includes(filterVal);
       });
