@@ -283,6 +283,23 @@
     .time-cell { color: var(--muted); font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; }
     .empty-row { text-align: center; padding: 3rem; color: var(--muted); }
     .loading-row { text-align: center; padding: 2rem; color: var(--muted); }
+    .loc-cell { font-size: 0.8rem; line-height: 1.4; }
+    .loc-cell .loc-main { color: var(--text); }
+    .loc-cell .loc-sub { color: var(--muted); font-size: 0.72rem; }
+    .ref-cell { font-size: 0.78rem; color: var(--muted); max-width: 160px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .badge-returning {
+      display: inline-block; margin-left: 0.4rem; font-size: 0.62rem; font-weight: 700;
+      padding: 0.12rem 0.4rem; border-radius: 4px; vertical-align: middle;
+      background: rgba(52,211,153,0.15); color: var(--green);
+      font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+    }
+    .visit-count-badge {
+      display: inline-block; font-size: 0.68rem; font-weight: 700;
+      padding: 0.1rem 0.5rem; border-radius: 10px; margin-left: 0.5rem;
+      background: rgba(167,139,250,0.15); color: var(--accent2);
+      font-family: 'JetBrains Mono', monospace;
+    }
 
     @media (max-width: 640px) {
       .form-grid { grid-template-columns: 1fr; }
@@ -420,20 +437,30 @@
     <div class="section-sub">Everyone who visited your homepage.</div>
     <div class="stats-grid">
       <div class="stat-card"><div class="slabel">Total Visits</div><div class="snum" id="stat-total">—</div></div>
+      <div class="stat-card"><div class="slabel">Unique Visitors</div><div class="snum" id="stat-unique">—</div></div>
       <div class="stat-card"><div class="slabel">Mobile Visitors</div><div class="snum" id="stat-mobile">—</div></div>
       <div class="stat-card"><div class="slabel">Desktop Visitors</div><div class="snum" id="stat-desktop">—</div></div>
       <div class="stat-card"><div class="slabel">Today's Visits</div><div class="snum" id="stat-today">—</div></div>
+    </div>
+    <div style="margin-bottom:1rem;display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap">
+      <input type="text" id="visitor-filter" placeholder="🔍 Filter by city, ISP, device, referrer…"
+        oninput="renderVisitors()"
+        style="max-width:320px;background:var(--card);border:1px solid var(--border);border-radius:8px;
+        padding:0.55rem 0.9rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:0.85rem;outline:none;"/>
+      <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;color:var(--muted);cursor:pointer">
+        <input type="checkbox" id="visitor-group" onchange="renderVisitors()"/> Group by visitor
+      </label>
     </div>
     <div class="visitors-table">
       <table>
         <thead>
           <tr>
             <th>Device</th><th>OS</th><th>Browser</th>
-            <th>Screen</th><th>Language</th><th>Time</th>
+            <th>Location / ISP</th><th>Referrer</th><th>Screen</th><th>Time</th>
           </tr>
         </thead>
         <tbody id="visitors-tbody">
-          <tr><td colspan="6" class="loading-row">Loading visitors…</td></tr>
+          <tr><td colspan="7" class="loading-row">Loading visitors…</td></tr>
         </tbody>
       </table>
     </div>
@@ -767,55 +794,113 @@
   };
 
   // ── VISITORS ──
+  let allVisitors = [];
+
   async function loadVisitors() {
     const tbody = document.getElementById("visitors-tbody");
-    tbody.innerHTML = `<tr><td colspan="6" class="loading-row">Loading visitors…</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Loading visitors…</td></tr>`;
     try {
       let snap;
       try { snap = await getDocs(query(collection(db,"visitors"), orderBy("visitedAt","desc"))); }
       catch { snap = await getDocs(collection(db,"visitors")); }
 
-      const visitors = snap.docs.map(d => d.data());
-      document.getElementById("stat-total").textContent   = visitors.length;
-      document.getElementById("stat-mobile").textContent  = visitors.filter(v => v.device !== "Desktop").length;
-      document.getElementById("stat-desktop").textContent = visitors.filter(v => v.device === "Desktop").length;
+      allVisitors = snap.docs.map(d => d.data());
+
+      document.getElementById("stat-total").textContent   = allVisitors.length;
+      document.getElementById("stat-mobile").textContent  = allVisitors.filter(v => v.device !== "Desktop").length;
+      document.getElementById("stat-desktop").textContent = allVisitors.filter(v => v.device === "Desktop").length;
+
+      const uniqueIds = new Set(allVisitors.map(v => v.visitorId).filter(Boolean));
+      // fall back to counting rows without visitorId (older records) as unique too
+      const noIdCount = allVisitors.filter(v => !v.visitorId).length;
+      document.getElementById("stat-unique").textContent = uniqueIds.size + noIdCount;
 
       const today = new Date().toDateString();
-      document.getElementById("stat-today").textContent = visitors.filter(v => {
+      document.getElementById("stat-today").textContent = allVisitors.filter(v => {
         if (!v.visitedAt) return false;
         const d = v.visitedAt.toDate ? v.visitedAt.toDate() : new Date(v.visitedAt);
         return d.toDateString() === today;
       }).length;
 
-      if (!visitors.length) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-row">No visitors yet.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = "";
-      visitors.forEach(v => {
-        const deviceIcon = { "iPhone":"📱","iPad":"📱","Android Phone":"📱","Android Tablet":"📱","Desktop":"🖥" }[v.device] || "🖥";
-        const browserClass = { Chrome:"badge-chrome",Firefox:"badge-firefox",Safari:"badge-safari",Edge:"badge-edge" }[v.browser] || "badge-other";
-        let timeStr = "—";
-        if (v.visitedAt) {
-          const d = v.visitedAt.toDate ? v.visitedAt.toDate() : new Date(v.visitedAt);
-          timeStr = d.toLocaleString();
-        }
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><span class="device-icon">${deviceIcon}</span>${v.device || "Unknown"}</td>
-          <td>${v.os || "Unknown"}</td>
-          <td><span class="badge ${browserClass}">${v.browser || "Unknown"}</span></td>
-          <td style="color:var(--muted);font-size:0.78rem;font-family:'JetBrains Mono',monospace">${v.screen || "—"}</td>
-          <td style="color:var(--muted);font-size:0.8rem">${v.language || "—"}</td>
-          <td class="time-cell">${timeStr}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+      renderVisitors();
     } catch(err) {
-      tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red);padding:2rem;text-align:center">Error loading visitors.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red);padding:2rem;text-align:center">Error loading visitors.</td></tr>`;
     }
   }
+
+  function fmtLocation(v) {
+    const parts = [v.city, v.region, v.country].filter(Boolean);
+    const main = parts.length ? parts.join(", ") : "Unknown location";
+    const sub = v.isp || v.ip || "";
+    return `<div class="loc-cell"><div class="loc-main">${main}</div>${sub ? `<div class="loc-sub">${sub}</div>` : ""}</div>`;
+  }
+
+  function visitorRowHTML(v, extraBadge) {
+    const deviceIcon = { "iPhone":"📱","iPad":"📱","Android Phone":"📱","Android Tablet":"📱","Desktop":"🖥" }[v.device] || "🖥";
+    const browserClass = { Chrome:"badge-chrome",Firefox:"badge-firefox",Safari:"badge-safari",Edge:"badge-edge" }[v.browser] || "badge-other";
+    let timeStr = "—";
+    if (v.visitedAt) {
+      const d = v.visitedAt.toDate ? v.visitedAt.toDate() : new Date(v.visitedAt);
+      timeStr = d.toLocaleString();
+    }
+    const referrer = !v.referrer || v.referrer === "Direct" ? "Direct" :
+      (() => { try { return new URL(v.referrer).hostname; } catch { return v.referrer; } })();
+    return `
+      <td><span class="device-icon">${deviceIcon}</span>${v.device || "Unknown"}${extraBadge || (v.isReturning ? '<span class="badge-returning">Returning</span>' : "")}</td>
+      <td>${v.os || "Unknown"}</td>
+      <td><span class="badge ${browserClass}">${v.browser || "Unknown"}</span></td>
+      <td>${fmtLocation(v)}</td>
+      <td class="ref-cell" title="${v.referrer || "Direct"}">${referrer}</td>
+      <td style="color:var(--muted);font-size:0.78rem;font-family:'JetBrains Mono',monospace">${v.screen || "—"}</td>
+      <td class="time-cell">${timeStr}</td>
+    `;
+  }
+
+  window.renderVisitors = () => {
+    const tbody = document.getElementById("visitors-tbody");
+    const filterVal = (document.getElementById("visitor-filter")?.value || "").toLowerCase().trim();
+    const grouped = document.getElementById("visitor-group")?.checked;
+
+    let visitors = allVisitors;
+    if (filterVal) {
+      visitors = visitors.filter(v => {
+        const hay = [v.city, v.region, v.country, v.isp, v.device, v.os, v.browser, v.referrer, v.ip]
+          .filter(Boolean).join(" ").toLowerCase();
+        return hay.includes(filterVal);
+      });
+    }
+
+    if (!visitors.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-row">No visitors match.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = "";
+
+    if (grouped) {
+      // collapse by visitorId, showing most recent visit + total count for that visitor
+      const byId = new Map();
+      visitors.forEach(v => {
+        const key = v.visitorId || ("__no_id__" + Math.random());
+        if (!byId.has(key)) byId.set(key, []);
+        byId.get(key).push(v);
+      });
+      byId.forEach(list => {
+        // list is already in desc time order since source query was ordered
+        const latest = list[0];
+        const countBadge = list.length > 1 ? `<span class="visit-count-badge">${list.length} visits</span>` : "";
+        const tr = document.createElement("tr");
+        tr.innerHTML = visitorRowHTML(latest, countBadge);
+        tbody.appendChild(tr);
+      });
+    } else {
+      visitors.forEach(v => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = visitorRowHTML(v);
+        tbody.appendChild(tr);
+      });
+    }
+  };
 
   // ── TOAST ──
   window.showToast = (msg, type="success") => {

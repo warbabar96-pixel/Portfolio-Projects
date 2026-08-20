@@ -586,8 +586,32 @@
 
   loadProjects();
 
+  // ── VISITOR ID (persists across visits on this browser) ──
+  function getVisitorId() {
+    let id = localStorage.getItem("wt_vid");
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : "vid-" + Date.now() + "-" + Math.random().toString(36).slice(2));
+      localStorage.setItem("wt_vid", id);
+    }
+    return id;
+  }
+
+  // ── SESSION ID (new per tab/session, used to avoid double-logging one visit) ──
+  function getSessionId() {
+    let sid = sessionStorage.getItem("wt_sid");
+    if (!sid) {
+      sid = (crypto.randomUUID ? crypto.randomUUID() : "sid-" + Date.now() + "-" + Math.random().toString(36).slice(2));
+      sessionStorage.setItem("wt_sid", sid);
+    }
+    return sid;
+  }
+
   (async () => {
     try {
+      // only log once per browser session/tab
+      if (sessionStorage.getItem("wt_logged")) return;
+      sessionStorage.setItem("wt_logged", "1");
+
       const ua = navigator.userAgent;
       let device = "Desktop";
       if (/iPhone/i.test(ua)) device = "iPhone";
@@ -607,10 +631,31 @@
       else if (/Android/i.test(ua)) os = "Android";
       else if (/iPhone|iPad/i.test(ua)) os = "iOS";
       else if (/Linux/i.test(ua)) os = "Linux";
+
+      const visitorId  = getVisitorId();
+      const sessionId  = getSessionId();
+      const isReturning = localStorage.getItem("wt_seen_before") === "1";
+      localStorage.setItem("wt_seen_before", "1");
+
+      // IP + rough geo/ISP lookup (best-effort, never blocks logging)
+      let geo = {};
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        if (res.ok) geo = await res.json();
+      } catch (e) { /* geo lookup failed, continue without it */ }
+
       await addDoc(collection(db,"visitors"), {
+        visitorId, sessionId, isReturning,
         device, browser, os,
         screen: `${screen.width}x${screen.height}`,
         language: navigator.language || "unknown",
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown",
+        referrer: document.referrer || "Direct",
+        ip: geo.ip || null,
+        city: geo.city || null,
+        region: geo.region || null,
+        country: geo.country_name || null,
+        isp: geo.org || null,
         visitedAt: serverTimestamp(), page: "home"
       });
     } catch(e) {}
