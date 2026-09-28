@@ -494,6 +494,39 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
+
+    /* ── DASHBOARD / DEVICES (new) ── */
+    .kpi-delta { font-size:.75rem; margin-top:.4rem; font-family:'JetBrains Mono',monospace; }
+    .kpi-delta.up { color: var(--green); } .kpi-delta.down { color: var(--red); } .kpi-delta.flat { color: var(--muted); }
+    .dash-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1.2rem; margin-bottom:1.2rem; }
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.4rem; min-width:0; }
+    .panel h4 { font-size:.95rem; font-weight:600; margin-bottom:1rem; display:flex; justify-content:space-between; gap:.5rem; }
+    .panel h4 span { color:var(--muted); font-weight:400; font-size:.8rem; }
+    .bars14 { display:flex; align-items:flex-end; gap:6px; height:150px; }
+    .bars14 .col { flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%; gap:4px; min-width:0; }
+    .bars14 .bar { width:100%; background:linear-gradient(180deg,var(--accent2),var(--accent)); border-radius:4px 4px 0 0; min-height:2px; }
+    .bars14 .lbl { font-size:.6rem; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+    .bars14 .val { font-size:.65rem; color:var(--text); }
+    .hbar { margin-bottom:.75rem; }
+    .hbar .top { display:flex; justify-content:space-between; font-size:.85rem; margin-bottom:.3rem; gap:.5rem; }
+    .hbar .top b { font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .hbar .track { height:6px; background:var(--surface); border-radius:3px; overflow:hidden; }
+    .hbar .fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:3px; }
+    .recent-item { display:flex; justify-content:space-between; gap:1rem; padding:.6rem 0; border-bottom:1px solid var(--border); font-size:.85rem; }
+    .recent-item:last-child { border-bottom:none; }
+    .recent-item .when { color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:.75rem; white-space:nowrap; }
+    .vis-toolbar { margin-bottom:1.5rem; display:flex; gap:.8rem; align-items:center; flex-wrap:wrap; }
+    .vis-toolbar select { background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; padding:.7rem .9rem; font-family:inherit; font-size:.85rem; }
+    .dev-row { display:grid; grid-template-columns:minmax(110px,1fr) 60px minmax(160px,2fr) auto; gap:.8rem; align-items:center; padding:.8rem 0; border-bottom:1px solid var(--border); }
+    .dev-row:last-child { border-bottom:none; }
+    .dev-row code { font-family:'JetBrains Mono',monospace; font-size:.8rem; color:var(--accent2); overflow-wrap:anywhere; }
+    .dev-row input { width:100%; padding:.6rem .8rem; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; }
+    .dev-row .cnt { color:var(--muted); font-size:.8rem; }
+    @media (max-width:640px){ .dev-row { grid-template-columns:1fr auto; } .dev-row input { grid-column:1 / -1; } }
+    .visitors-table { overflow-x:auto; }
+    .visitors-table td { white-space:nowrap; }
+    .visitors-table td .loc-cell { white-space:normal; min-width:170px; }
+
     /* Toast */
     #toast {
       position: fixed; bottom: 2.5rem; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -589,7 +622,10 @@
       </button>
     </div>
     <div class="drawer-nav">
-      <button class="drawer-item active" data-tab="add" onclick="switchTab('add')">
+      <button class="drawer-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+        <i class="fa-solid fa-chart-line"></i> Dashboard
+      </button>
+      <button class="drawer-item" data-tab="add" onclick="switchTab('add')">
         <i class="fa-solid fa-plus-circle"></i> Add Project
       </button>
       <button class="drawer-item" data-tab="manage" onclick="switchTab('manage')">
@@ -597,6 +633,9 @@
       </button>
       <button class="drawer-item" data-tab="visitors" onclick="switchTab('visitors')">
         <i class="fa-solid fa-users"></i> Visitors
+      </button>
+      <button class="drawer-item" data-tab="devices" onclick="switchTab('devices')">
+        <i class="fa-solid fa-mobile-screen"></i> Device Names
       </button>
       <button class="drawer-item" data-tab="maintenance" onclick="switchTab('maintenance')">
         <i class="fa-solid fa-gear"></i> Maintenance
@@ -610,7 +649,28 @@
   </div>
 
   <!-- TAB: ADD -->
-  <div class="tab-content active" id="tab-add">
+  <!-- TAB: DASHBOARD -->
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="section-title">Dashboard</div>
+    <div class="section-sub">Your site at a glance.</div>
+    <div class="stats-grid" id="dash-kpis"></div>
+    <div class="panel" style="margin-bottom:1.2rem"><h4>Visits, last 14 days <span id="dash-14-total"></span></h4><div class="bars14" id="dash-14"></div></div>
+    <div class="dash-grid">
+      <div class="panel"><h4>Top locations</h4><div id="dash-loc"></div></div>
+      <div class="panel"><h4>Traffic sources</h4><div id="dash-ref"></div></div>
+      <div class="panel"><h4>Devices</h4><div id="dash-dev"></div></div>
+      <div class="panel"><h4>Latest visitors</h4><div id="dash-recent"></div></div>
+    </div>
+  </div>
+
+  <!-- TAB: DEVICE NAMES -->
+  <div class="tab-content" id="tab-devices">
+    <div class="section-title">Device Names</div>
+    <div class="section-sub">Give model codes a readable name once. Every past and future visit updates automatically.</div>
+    <div class="panel"><div id="dev-list"></div><div id="dev-note" style="color:var(--muted);font-size:.8rem;margin-top:1rem"></div></div>
+  </div>
+
+  <div class="tab-content" id="tab-add">
     <div class="section-title">Add New Project</div>
     <div class="section-sub">Fill in the details below and publish to your portfolio homepage.</div>
 
@@ -718,6 +778,15 @@
       <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--muted);cursor:pointer">
         <input type="checkbox" id="visitor-group" onchange="renderVisitors()"/> Group by visitor
       </label>
+      <select id="visitor-range" onchange="renderVisitors()" aria-label="Date range">
+        <option value="0">All time</option><option value="1">Today</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option>
+      </select>
+      <select id="visitor-type" onchange="renderVisitors()" aria-label="Device type">
+        <option value="">All devices</option><option value="mobile">Mobile</option><option value="desktop">Desktop</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="exportVisitorsCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadVisitors()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+      <span id="visitor-count" style="color:var(--muted);font-size:.8rem"></span>
     </div>
     <div class="visitors-table">
       <table>
@@ -890,6 +959,7 @@
       document.getElementById("admin-screen").style.display = "block";
       loadProjects();
       loadMaintenanceSettings(); // Load maintenance state
+      loadDeviceNames().then(loadVisitors);
     } else {
       document.getElementById("login-screen").style.display = "flex";
       document.getElementById("admin-screen").style.display = "none";
@@ -911,7 +981,7 @@
     document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
     document.getElementById(`tab-${tab}`).classList.add("active");
     if (tab === "manage") loadProjects();
-    if (tab === "visitors") loadVisitors();
+    if (tab === "visitors" || tab === "dashboard" || tab === "devices") loadVisitors();
     if (tab === "maintenance") loadMaintenanceSettings();
     toggleDrawer(false);
   };
@@ -1153,9 +1223,112 @@
     } catch(err) { showToast("Error: " + err.message, "error"); }
   };
 
+  // ── HELPERS (new) ──
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const DEFAULT_NAMES = {
+    "SM-X110":"Samsung Galaxy Tab A9", "SM-X115":"Samsung Galaxy Tab A9 5G",
+    "SM-S918B":"Samsung Galaxy S23 Ultra", "SM-S911B":"Samsung Galaxy S23",
+    "SM-S921B":"Samsung Galaxy S24", "SM-S928B":"Samsung Galaxy S24 Ultra",
+    "SM-A546E":"Samsung Galaxy A54 5G", "SM-A556E":"Samsung Galaxy A55 5G",
+    "SM-A356E":"Samsung Galaxy A35 5G", "SM-A155F":"Samsung Galaxy A15"
+  };
+  let customNames = {};
+  const nameMap = () => ({ ...DEFAULT_NAMES, ...customNames });
+  function niceDevice(v) {
+    const m = (v.model || "").trim();
+    if (m) return nameMap()[m] || (/^Pixel/i.test(m) ? "Google " + m : m);
+    return v.device || "Unknown";
+  }
+  const CC = {India:"IN","United States":"US","United Kingdom":"GB",Pakistan:"PK",Bangladesh:"BD",Nepal:"NP","United Arab Emirates":"AE","Saudi Arabia":"SA",Canada:"CA",Australia:"AU",Germany:"DE",France:"FR",Singapore:"SG",Indonesia:"ID",Russia:"RU",Brazil:"BR"};
+  function flag(v) {
+    const c = (v.countryCode || CC[v.country] || "").toUpperCase();
+    return c.length === 2 ? String.fromCodePoint(...[...c].map(x => 127397 + x.charCodeAt(0))) : "🌐";
+  }
+  const vDate = v => v.visitedAt ? (v.visitedAt.toDate ? v.visitedAt.toDate() : new Date(v.visitedAt)) : null;
+  function relTime(d) {
+    if (!d) return "—";
+    const s = Math.max(0, (Date.now() - d) / 1000);
+    if (s < 60) return "just now";
+    if (s < 3600) return Math.floor(s / 60) + " min ago";
+    if (s < 86400) return Math.floor(s / 3600) + " hr ago";
+    if (s < 604800) return Math.floor(s / 86400) + " d ago";
+    return d.toLocaleDateString();
+  }
+  const isMobile = v => v.device !== "Desktop";
+
+  async function loadDeviceNames() {
+    try {
+      const snap = await getDocs(collection(db, "settings"));
+      const d = snap.docs.find(x => x.id === "deviceNames");
+      customNames = (d && d.data().map) || {};
+    } catch (e) { console.warn("Device names load failed", e); }
+  }
+  window.saveDeviceName = async (btn) => {
+    const code = btn.dataset.code, name = btn.parentElement.querySelector("input").value.trim();
+    if (name) customNames[code] = name; else delete customNames[code];
+    try {
+      await setDoc(doc(db, "settings", "deviceNames"), { map: customNames, updatedAt: serverTimestamp() });
+      showToast("✅ Device name saved", "success");
+      renderVisitors(); renderDashboard(); renderDevices();
+    } catch (err) { showToast("Error: " + err.message, "error"); }
+  };
+  function renderDevices() {
+    const counts = new Map();
+    allVisitors.forEach(v => { if (v.model) counts.set(v.model, (counts.get(v.model) || 0) + 1); });
+    const rows = [...counts].sort((a, b) => b[1] - a[1]);
+    document.getElementById("dev-list").innerHTML = rows.length ? rows.map(([code, n]) => {
+      const named = nameMap()[code] || (/^Pixel/i.test(code) ? "Google " + code : "");
+      return `<div class="dev-row"><code>${esc(code)}</code><span class="cnt">${n} visit${n > 1 ? "s" : ""}</span>
+        <div style="display:contents"><input type="text" value="${esc(named)}" placeholder="e.g. Redmi Note 14 5G"/>
+        <button class="btn btn-primary btn-sm" data-code="${esc(code)}" onclick="saveDeviceName(this)">Save</button></div></div>`;
+    }).join("") : `<div class="empty-row">No model codes recorded yet.</div>`;
+    const none = allVisitors.filter(v => !v.model && v.os === "Android").length;
+    document.getElementById("dev-note").textContent = none ? `${none} Android visits have no model saved (they were logged before the tracking update). New visits will include it.` : "";
+  }
+
+  // ── DASHBOARD (new) ──
+  const hbars = (entries, total) => entries.length ? entries.map(([k, n]) =>
+    `<div class="hbar"><div class="top"><b>${k}</b><span>${n}</span></div><div class="track"><div class="fill" style="width:${Math.max(3, n / total * 100)}%"></div></div></div>`).join("")
+    : `<div class="empty-row" style="padding:1rem">No data yet</div>`;
+  const top = (arr, fn, n = 6) => { const m = new Map(); arr.forEach(v => { const k = fn(v); if (k) m.set(k, (m.get(k) || 0) + 1); }); return [...m].sort((a, b) => b[1] - a[1]).slice(0, n); };
+  function renderDashboard() {
+    const all = allVisitors, now = new Date(), day = 86400000;
+    const within = (from, to) => all.filter(v => { const d = vDate(v); return d && d >= from && d < to; }).length;
+    const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const w1 = within(new Date(+startToday - 6 * day), new Date(+startToday + day));
+    const w0 = within(new Date(+startToday - 13 * day), new Date(+startToday - 6 * day));
+    const delta = w0 ? Math.round((w1 - w0) / w0 * 100) : null;
+    const uniq = new Set(all.map(v => v.visitorId).filter(Boolean)).size + all.filter(v => !v.visitorId).length;
+    const ret = all.length ? Math.round(all.filter(v => v.isReturning).length / all.length * 100) : 0;
+    const kpi = (l, n, extra = "") => `<div class="stat-card"><div class="slabel">${l}</div><div class="snum">${n}</div>${extra}</div>`;
+    document.getElementById("dash-kpis").innerHTML =
+      kpi("Total visits", all.length) + kpi("Unique visitors", uniq) + kpi("Today", within(startToday, new Date(+startToday + day))) +
+      kpi("Last 7 days", w1, delta === null ? "" : `<div class="kpi-delta ${delta > 0 ? "up" : delta < 0 ? "down" : "flat"}">${delta > 0 ? "▲" : delta < 0 ? "▼" : "•"} ${Math.abs(delta)}% vs prior week</div>`) +
+      kpi("Returning", ret + "%") + kpi("Projects", (document.getElementById("project-count-badge").textContent || "0").split(" ")[0]);
+    const days = [...Array(14)].map((_, i) => { const s = new Date(+startToday - (13 - i) * day); return { s, n: within(s, new Date(+s + day)) }; });
+    const max = Math.max(1, ...days.map(d => d.n));
+    document.getElementById("dash-14-total").textContent = days.reduce((a, d) => a + d.n, 0) + " total";
+    document.getElementById("dash-14").innerHTML = days.map(d => `<div class="col" title="${d.s.toDateString()}: ${d.n}"><span class="val">${d.n || ""}</span><div class="bar" style="height:${d.n / max * 100}%"></div><span class="lbl">${d.s.getDate()}</span></div>`).join("");
+    document.getElementById("dash-loc").innerHTML = hbars(top(all, v => v.city ? `${flag(v)} ${esc(v.city)}` : ""), all.length);
+    document.getElementById("dash-ref").innerHTML = hbars(top(all, v => { if (!v.referrer || v.referrer === "Direct") return "Direct"; try { return esc(new URL(v.referrer).hostname.replace(/^www\./, "")); } catch { return esc(v.referrer); } }), all.length);
+    document.getElementById("dash-dev").innerHTML = hbars(top(all, v => v.model ? esc(niceDevice(v)) : esc(v.device)), all.length);
+    document.getElementById("dash-recent").innerHTML = all.slice(0, 6).map(v =>
+      `<div class="recent-item"><span>${flag(v)} ${esc(v.city || v.country || "Unknown")} · ${esc(niceDevice(v))}</span><span class="when">${relTime(vDate(v))}</span></div>`).join("") || `<div class="empty-row" style="padding:1rem">No visits yet</div>`;
+  }
+
+  window.exportVisitorsCSV = () => {
+    const rows = [["Time","Device","OS","Browser","City","Region","Country","ISP","Referrer","Screen"]];
+    filteredVisitors().forEach(v => { const d = vDate(v); rows.push([d ? d.toISOString() : "", niceDevice(v), v.os, v.browser, v.city, v.region, v.country, v.isp, v.referrer, v.screen]); });
+    const csv = rows.map(r => r.map(c => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.download = "wartech-visitors.csv"; a.click();
+  };
+
   // ── VISITORS ──
   let allVisitors = [];
 
+  window.loadVisitors = loadVisitors;
   async function loadVisitors() {
     const tbody = document.getElementById("visitors-tbody");
     tbody.innerHTML = `<tr><td colspan="7" class="loading-row"><i class="fa-solid fa-spinner fa-spin"></i> Loading visitors…</td></tr>`;
@@ -1181,7 +1354,7 @@
         return d.toDateString() === today;
       }).length;
 
-      renderVisitors();
+      renderVisitors(); renderDashboard(); renderDevices();
     } catch(err) {
       tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red);padding:2rem;text-align:center"><i class="fa-solid fa-circle-exclamation"></i> Error loading visitors.</td></tr>`;
     }
@@ -1191,40 +1364,51 @@
     const parts = [v.city, v.region, v.country].filter(Boolean);
     const main = parts.length ? parts.join(", ") : "Unknown location";
     const sub = v.isp || v.ip || "";
-    return `<div class="loc-cell"><div class="loc-main">${main}</div>${sub ? `<div class="loc-sub">${sub}</div>` : ""}</div>`;
+    return `<div class="loc-cell"><div class="loc-main">${flag(v)} ${esc(main)}</div>${sub ? `<div class="loc-sub">${esc(sub)}</div>` : ""}</div>`;
   }
 
   function visitorRowHTML(v, extraBadge) {
     const deviceIcon = { "iPhone":"📱","iPad":"📱","Android Phone":"📱","Android Tablet":"📱","Desktop":"🖥" }[v.device] || "🖥";
     const browserClass = { Chrome:"badge-chrome",Firefox:"badge-firefox",Safari:"badge-safari",Edge:"badge-edge" }[v.browser] || "badge-other";
-    const deviceLabel = v.model || v.device || "Unknown";
-    let timeStr = "—";
-    if (v.visitedAt) {
-      const d = v.visitedAt.toDate ? v.visitedAt.toDate() : new Date(v.visitedAt);
-      timeStr = d.toLocaleString();
-    }
+    const deviceLabel = esc(niceDevice(v));
+    const dt = vDate(v);
+    const timeStr = dt ? `<span title="${esc(dt.toLocaleString())}">${relTime(dt)}</span>` : "—";
     const referrer = !v.referrer || v.referrer === "Direct" ? "Direct" :
       (() => { try { return new URL(v.referrer).hostname; } catch { return v.referrer; } })();
     return `
       <td><span class="device-icon">${deviceIcon}</span>${deviceLabel}${extraBadge || (v.isReturning ? '<span class="badge-returning">Returning</span>' : "")}</td>
-      <td>${v.os || "Unknown"}</td>
-      <td><span class="badge ${browserClass}">${v.browser || "Unknown"}</span></td>
+      <td>${esc(v.os || "Unknown")}${v.osVersion ? `<div class="loc-sub">${esc(v.osVersion)}</div>` : ""}</td>
+      <td><span class="badge ${browserClass}">${esc(v.browser || "Unknown")}</span></td>
       <td>${fmtLocation(v)}</td>
-      <td class="ref-cell" title="${v.referrer || "Direct"}">${referrer}</td>
-      <td style="color:var(--muted);font-size:0.8rem;font-family:'JetBrains Mono',monospace">${v.screen || "—"}</td>
+      <td class="ref-cell" title="${esc(v.referrer || "Direct")}">${esc(referrer)}</td>
+      <td style="color:var(--muted);font-size:0.8rem;font-family:'JetBrains Mono',monospace">${esc(v.screen || "—")}</td>
       <td class="time-cell">${timeStr}</td>
     `;
   }
 
+  function filteredVisitors(skipText) {
+    const range = +(document.getElementById("visitor-range")?.value || 0);
+    const type = document.getElementById("visitor-type")?.value || "";
+    const q = (document.getElementById("visitor-filter")?.value || "").toLowerCase().trim();
+    const from = range ? new Date(new Date().setHours(0, 0, 0, 0)) - (range - 1) * 86400000 : 0;
+    return allVisitors.filter(v => {
+      if (range) { const d = vDate(v); if (!d || d < from) return false; }
+      if (type === "mobile" && !isMobile(v)) return false;
+      if (type === "desktop" && isMobile(v)) return false;
+      if (!skipText && q) return [v.city, v.region, v.country, v.isp, v.device, v.model, niceDevice(v), v.os, v.browser, v.referrer, v.ip].filter(Boolean).join(" ").toLowerCase().includes(q);
+      return true;
+    });
+  }
   window.renderVisitors = () => {
     const tbody = document.getElementById("visitors-tbody");
     const filterVal = (document.getElementById("visitor-filter")?.value || "").toLowerCase().trim();
     const grouped = document.getElementById("visitor-group")?.checked;
 
-    let visitors = allVisitors;
+    let visitors = filteredVisitors(true);
+    document.getElementById("visitor-count").textContent = visitors.length + " shown";
     if (filterVal) {
       visitors = visitors.filter(v => {
-        const hay = [v.city, v.region, v.country, v.isp, v.device, v.model, v.os, v.browser, v.referrer, v.ip]
+        const hay = [v.city, v.region, v.country, v.isp, v.device, v.model, niceDevice(v), v.os, v.browser, v.referrer, v.ip]
           .filter(Boolean).join(" ").toLowerCase();
         return hay.includes(filterVal);
       });

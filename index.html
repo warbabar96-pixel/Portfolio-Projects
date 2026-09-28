@@ -680,13 +680,20 @@
     }
     return sid;
   }
-  function getPhoneModel(ua) {
-    if (!/Android/i.test(ua)) return null;
+  // Chrome hides the phone model in the UA string, so ask Client Hints first
+  async function getDeviceInfo(ua) {
+    if (!/Android/i.test(ua)) return { model: null, osVersion: null };
+    try {
+      const d = navigator.userAgentData;
+      if (d && d.getHighEntropyValues) {
+        const h = await d.getHighEntropyValues(["model", "platformVersion"]);
+        const major = (h.platformVersion || "").split(".")[0];
+        return { model: (h.model || "").trim() || null, osVersion: major ? "Android " + major : null };
+      }
+    } catch (e) {}
     const m = ua.match(/Android\s+[\d.]+;\s*([^;)]+?)\s*(?:Build\/|\))/i);
-    if (!m || !m[1]) return null;
-    let model = m[1].trim();
-    if (!model || model.length < 2 || /^(K|wv|Mobile)$/i.test(model)) return null;
-    return model;
+    const model = m && m[1] && m[1].length > 1 && !/^(K|wv|Mobile)$/i.test(m[1]) ? m[1].trim() : null;
+    return { model, osVersion: null };
   }
   (async () => {
     try {
@@ -716,7 +723,7 @@
       const sessionId  = getSessionId();
       const isReturning = localStorage.getItem("wt_seen_before") === "1";
       localStorage.setItem("wt_seen_before", "1");
-      const model = getPhoneModel(ua);
+      const { model, osVersion } = await getDeviceInfo(ua);
 
       let geo = {};
       try {
@@ -726,7 +733,7 @@
 
       await addDoc(collection(db,"visitors"), {
         visitorId, sessionId, isReturning,
-        device, browser, os, model,
+        device, browser, os, model, osVersion,
         screen: `${screen.width}x${screen.height}`,
         language: navigator.language || "unknown",
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown",
@@ -735,6 +742,7 @@
         city: geo.city || null,
         region: geo.region || null,
         country: geo.country_name || null,
+        countryCode: geo.country_code || null,
         isp: geo.org || null,
         visitedAt: serverTimestamp(), page: "home"
       });
