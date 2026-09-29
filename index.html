@@ -577,7 +577,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, query, orderBy, addDoc, serverTimestamp, doc, getDoc }
+  import { getFirestore, collection, getDocs, query, orderBy, addDoc, updateDoc, arrayUnion, serverTimestamp, doc, getDoc }
     from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -656,14 +656,15 @@
     card.appendChild(body);
     const foot = document.createElement("div");
     foot.className = "card-footer";
-    if (p.liveUrl)   foot.innerHTML += `<a class="btn btn-sm btn-demo" href="${p.liveUrl}" target="_blank"><i class="fa-solid fa-link"></i> Live Demo</a>`;
-    if (p.githubUrl) foot.innerHTML += `<a class="btn btn-sm btn-gh" href="${p.githubUrl}" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>`;
-    if (p.apkUrl)    foot.innerHTML += `<a class="btn btn-sm btn-apk" href="${p.apkUrl}" target="_blank" download><i class="fa-solid fa-download"></i> APK</a>`;
+    if (p.liveUrl)   foot.innerHTML += `<a class="btn btn-sm btn-demo" data-track-label="${String(p.title||"Project").replace(/"/g,"&quot;")} — Live Demo" href="${p.liveUrl}" target="_blank"><i class="fa-solid fa-link"></i> Live Demo</a>`;
+    if (p.githubUrl) foot.innerHTML += `<a class="btn btn-sm btn-gh" data-track-label="${String(p.title||"Project").replace(/"/g,"&quot;")} — GitHub" href="${p.githubUrl}" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>`;
+    if (p.apkUrl)    foot.innerHTML += `<a class="btn btn-sm btn-apk" data-track-label="${String(p.title||"Project").replace(/"/g,"&quot;")} — APK" href="${p.apkUrl}" target="_blank" download><i class="fa-solid fa-download"></i> APK</a>`;
     card.appendChild(foot);
     return card;
   }
 
-  // ── VISITOR TRACKING (unchanged from your original) ──
+  // ── VISITOR TRACKING ──
+  // Anonymous analytics only: this identifies a browser/session, not a real person.
   function getVisitorId() {
     let id = localStorage.getItem("wt_vid");
     if (!id) {
@@ -680,7 +681,6 @@
     }
     return sid;
   }
-  // Chrome hides the phone model in the UA string, so ask Client Hints first
   async function getDeviceInfo(ua) {
     if (!/Android/i.test(ua)) return { model: null, osVersion: null };
     try {
@@ -695,10 +695,52 @@
     const model = m && m[1] && m[1].length > 1 && !/^(K|wv|Mobile)$/i.test(m[1]) ? m[1].trim() : null;
     return { model, osVersion: null };
   }
+
+  let wtVisitRef = null;
+  let wtVisitStarted = Date.now();
+  let wtLastSavedDuration = 0;
+  let wtVisitorId = null;
+  let wtSessionId = null;
+
+  function trackPageName() {
+    const id = location.hash.replace(/^#/, "");
+    return id ? id.charAt(0).toUpperCase() + id.slice(1) : "Home";
+  }
+
+  async function trackEvent(type, label, url = "") {
+    try {
+      if (!wtVisitorId || !wtSessionId) return;
+      await addDoc(collection(db, "visitorEvents"), {
+        visitorId: wtVisitorId,
+        sessionId: wtSessionId,
+        type,
+        label: label || "Unknown",
+        url: url || "",
+        page: trackPageName(),
+        referrer: document.referrer || "Direct",
+        occurredAt: serverTimestamp()
+      });
+    } catch (e) { console.warn("Analytics event failed", e); }
+  }
+
+  async function saveVisitDuration(force = false) {
+    try {
+      if (!wtVisitRef) return;
+      const seconds = Math.max(0, Math.round((Date.now() - wtVisitStarted) / 1000));
+      if (!force && seconds - wtLastSavedDuration < 5) return;
+      wtLastSavedDuration = seconds;
+      await updateDoc(wtVisitRef, {
+        durationSeconds: seconds,
+        lastSeenAt: serverTimestamp()
+      });
+    } catch (e) {}
+  }
+
   (async () => {
     try {
       if (sessionStorage.getItem("wt_logged")) return;
       sessionStorage.setItem("wt_logged", "1");
+
       const ua = navigator.userAgent;
       let device = "Desktop";
       if (/iPhone/i.test(ua)) device = "iPhone";
@@ -719,8 +761,8 @@
       else if (/iPhone|iPad/i.test(ua)) os = "iOS";
       else if (/Linux/i.test(ua)) os = "Linux";
 
-      const visitorId  = getVisitorId();
-      const sessionId  = getSessionId();
+      wtVisitorId = getVisitorId();
+      wtSessionId = getSessionId();
       const isReturning = localStorage.getItem("wt_seen_before") === "1";
       localStorage.setItem("wt_seen_before", "1");
       const { model, osVersion } = await getDeviceInfo(ua);
@@ -731,8 +773,11 @@
         if (res.ok) geo = await res.json();
       } catch (e) {}
 
-      await addDoc(collection(db,"visitors"), {
-        visitorId, sessionId, isReturning,
+      wtVisitStarted = Date.now();
+      wtVisitRef = await addDoc(collection(db, "visitors"), {
+        visitorId: wtVisitorId,
+        sessionId: wtSessionId,
+        isReturning,
         device, browser, os, model, osVersion,
         screen: `${screen.width}x${screen.height}`,
         language: navigator.language || "unknown",
@@ -744,10 +789,49 @@
         country: geo.country_name || null,
         countryCode: geo.country_code || null,
         isp: geo.org || null,
-        visitedAt: serverTimestamp(), page: "home"
+        page: trackPageName(),
+        pagesVisited: [trackPageName()],
+        durationSeconds: 0,
+        startedAt: serverTimestamp(),
+        lastSeenAt: serverTimestamp(),
+        visitedAt: serverTimestamp()
       });
-    } catch(e) {}
+
+      await trackEvent("page_view", trackPageName(), location.href);
+    } catch(e) { console.warn("Visitor tracking failed", e); }
   })();
+
+  // Track every link/button destination on your portfolio.
+  // This records that a click happened. It cannot prove that an APK was installed or that an external site was actually opened.
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("a[href]");
+    if (!link || link.closest("#admin-screen")) return;
+    const href = link.href || link.getAttribute("href") || "";
+    if (!href || href.startsWith("javascript:") || href === "#") return;
+    const label = link.dataset.trackLabel || link.textContent.trim().replace(/\s+/g, " ") || href;
+    let type = "link_click";
+    if (/instagram\.com/i.test(href)) type = "instagram_click";
+    else if (/mailto:/i.test(href)) type = "email_click";
+    else if (/github\.com/i.test(href)) type = "github_click";
+    else if (/linkedin\.com/i.test(href)) type = "linkedin_click";
+    else if (/\.apk(?:$|[?#])/i.test(href) || /\bAPK\b/i.test(label)) type = "apk_click";
+    else if (link.target === "_blank") type = "external_link_click";
+    trackEvent(type, label, href);
+  }, { capture: true });
+
+  // Track section/page navigation on this single-page portfolio.
+  window.addEventListener("hashchange", () => {
+    const page = trackPageName();
+    trackEvent("page_view", page, location.href);
+    if (wtVisitRef) updateDoc(wtVisitRef, { pagesVisited: arrayUnion(page) }).catch(() => {});
+  });
+
+  // Save time spent while the visitor remains on the page.
+  setInterval(() => saveVisitDuration(false), 15000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") saveVisitDuration(true);
+  });
+  window.addEventListener("pagehide", () => saveVisitDuration(true));
 
   // ── MUSIC PLAYER (unchanged) ──
   const audio   = document.getElementById("bg-music");

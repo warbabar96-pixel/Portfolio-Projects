@@ -607,6 +607,7 @@
     </div>
     <div class="header-right">
       <span style="font-size:0.85rem;color:var(--muted)" id="project-count-badge"></span>
+      <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
       <button class="btn-hamburger" onclick="toggleDrawer()" aria-label="Menu">
         <i class="fa-solid fa-bars"></i>
       </button>
@@ -788,16 +789,22 @@
       <button class="btn btn-ghost btn-sm" onclick="loadVisitors()"><i class="fa-solid fa-rotate"></i> Refresh</button>
       <span id="visitor-count" style="color:var(--muted);font-size:.8rem"></span>
     </div>
+    <div class="panel" style="margin-bottom:1.2rem">
+      <h4><span>Click activity</span><span id="event-count" style="color:var(--muted);font-size:.75rem"></span></h4>
+      <div id="visitor-events" style="display:flex;flex-direction:column;gap:.65rem;max-height:360px;overflow:auto">
+        <div class="loading-row">Loading click activity…</div>
+      </div>
+    </div>
     <div class="visitors-table">
       <table>
         <thead>
           <tr>
-            <th>Device</th><th>OS</th><th>Browser</th>
+            <th>Visitor / Session</th><th>Device</th><th>OS</th><th>Browser</th>
             <th>Location / ISP</th><th>Referrer</th><th>Screen</th><th>Time</th>
           </tr>
         </thead>
         <tbody id="visitors-tbody">
-          <tr><td colspan="7" class="loading-row"><i class="fa-solid fa-spinner fa-spin"></i> Loading visitors…</td></tr>
+          <tr><td colspan="8" class="loading-row"><i class="fa-solid fa-spinner fa-spin"></i> Loading visitors…</td></tr>
         </tbody>
       </table>
     </div>
@@ -1270,6 +1277,7 @@
       await setDoc(doc(db, "settings", "deviceNames"), { map: customNames, updatedAt: serverTimestamp() });
       showToast("✅ Device name saved", "success");
       renderVisitors(); renderDashboard(); renderDevices();
+      loadVisitorEvents();
     } catch (err) { showToast("Error: " + err.message, "error"); }
   };
   function renderDevices() {
@@ -1317,8 +1325,8 @@
   }
 
   window.exportVisitorsCSV = () => {
-    const rows = [["Time","Device","OS","Browser","City","Region","Country","ISP","Referrer","Screen"]];
-    filteredVisitors().forEach(v => { const d = vDate(v); rows.push([d ? d.toISOString() : "", niceDevice(v), v.os, v.browser, v.city, v.region, v.country, v.isp, v.referrer, v.screen]); });
+    const rows = [["Time","Visitor ID","Session ID","Device","OS","Browser","City","Region","Country","ISP","Referrer","Screen","Duration (s)","Pages"]];
+    filteredVisitors().forEach(v => { const d = vDate(v); rows.push([d ? d.toISOString() : "", v.visitorId, v.sessionId, niceDevice(v), v.os, v.browser, v.city, v.region, v.country, v.isp, v.referrer, v.screen, v.durationSeconds || 0, Array.isArray(v.pagesVisited) ? v.pagesVisited.join(" > ") : v.page]); });
     const csv = rows.map(r => r.map(c => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
@@ -1331,7 +1339,7 @@
   window.loadVisitors = loadVisitors;
   async function loadVisitors() {
     const tbody = document.getElementById("visitors-tbody");
-    tbody.innerHTML = `<tr><td colspan="7" class="loading-row"><i class="fa-solid fa-spinner fa-spin"></i> Loading visitors…</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="loading-row"><i class="fa-solid fa-spinner fa-spin"></i> Loading visitors…</td></tr>`;
     try {
       let snap;
       try { snap = await getDocs(query(collection(db,"visitors"), orderBy("visitedAt","desc"))); }
@@ -1356,7 +1364,7 @@
 
       renderVisitors(); renderDashboard(); renderDevices();
     } catch(err) {
-      tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red);padding:2rem;text-align:center"><i class="fa-solid fa-circle-exclamation"></i> Error loading visitors.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" style="color:var(--red);padding:2rem;text-align:center"><i class="fa-solid fa-circle-exclamation"></i> Error loading visitors.</td></tr>`;
     }
   }
 
@@ -1375,8 +1383,14 @@
     const timeStr = dt ? `<span title="${esc(dt.toLocaleString())}">${relTime(dt)}</span>` : "—";
     const referrer = !v.referrer || v.referrer === "Direct" ? "Direct" :
       (() => { try { return new URL(v.referrer).hostname; } catch { return v.referrer; } })();
+    const duration = Number(v.durationSeconds || 0);
+    const durationText = duration < 60 ? `${duration}s` : `${Math.floor(duration/60)}m ${duration%60}s`;
+    const visitorShort = v.visitorId ? v.visitorId.slice(0, 8) : "—";
+    const sessionShort = v.sessionId ? v.sessionId.slice(0, 8) : "—";
+    const pages = Array.isArray(v.pagesVisited) ? v.pagesVisited.join(" → ") : (v.page || "Home");
     return `
-      <td><span class="device-icon">${deviceIcon}</span>${deviceLabel}${extraBadge || (v.isReturning ? '<span class="badge-returning">Returning</span>' : "")}</td>
+      <td style="min-width:180px"><div style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#ff6ec7">VID ${esc(visitorShort)}</div><div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted)">SID ${esc(sessionShort)}</div><div style="font-size:.72rem;color:var(--muted);margin-top:.25rem">${esc(v.isReturning ? "Returning" : "New")} · ${esc(durationText)}</div><div style="font-size:.7rem;color:var(--muted);max-width:210px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(pages)}">${esc(pages)}</div>${extraBadge || ""}</td>
+      <td><span class="device-icon">${deviceIcon}</span>${deviceLabel}</td>
       <td>${esc(v.os || "Unknown")}${v.osVersion ? `<div class="loc-sub">${esc(v.osVersion)}</div>` : ""}</td>
       <td><span class="badge ${browserClass}">${esc(v.browser || "Unknown")}</span></td>
       <td>${fmtLocation(v)}</td>
@@ -1415,7 +1429,7 @@
     }
 
     if (!visitors.length) {
-      tbody.innerHTML = `<tr><td colspan="7" class="empty-row"><i class="fa-solid fa-inbox"></i> No visitors match.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="empty-row"><i class="fa-solid fa-inbox"></i> No visitors match.</td></tr>`;
       return;
     }
 
@@ -1443,6 +1457,35 @@
       });
     }
   };
+
+  // ── CLICK ACTIVITY ──
+  async function loadVisitorEvents() {
+    const box = document.getElementById("visitor-events");
+    if (!box) return;
+    box.innerHTML = `<div class="loading-row">Loading click activity…</div>`;
+    try {
+      let snap;
+      try { snap = await getDocs(query(collection(db, "visitorEvents"), orderBy("occurredAt", "desc"))); }
+      catch { snap = await getDocs(collection(db, "visitorEvents")); }
+      const events = snap.docs.map(d => ({ id:d.id, ...d.data() })).slice(0, 100);
+      document.getElementById("event-count").textContent = events.length + " recent events";
+      if (!events.length) {
+        box.innerHTML = `<div class="empty-row" style="padding:1rem">No click activity yet.</div>`;
+        return;
+      }
+      const icon = type => type === "apk_click" ? "fa-download" : type === "email_click" ? "fa-envelope" : type === "instagram_click" ? "fa-instagram" : type === "github_click" ? "fa-github" : type === "linkedin_click" ? "fa-linkedin" : type === "page_view" ? "fa-eye" : "fa-arrow-up-right-from-square";
+      box.innerHTML = events.map(e => {
+        const d = e.occurredAt?.toDate ? e.occurredAt.toDate() : (e.occurredAt ? new Date(e.occurredAt) : null);
+        const when = d ? relTime(d) : "just now";
+        const url = e.url || "";
+        const urlText = url.length > 85 ? url.slice(0,82) + "…" : url;
+        return `<div style="padding:.8rem 1rem;border:1px solid var(--border);border-radius:10px;background:var(--surface)">\n          <div style="display:flex;align-items:center;gap:.65rem"><i class="fa-solid ${icon(e.type)}" style="color:#ff6ec7;width:18px"></i><strong style="font-size:.85rem">${esc(e.label || e.type)}</strong><span style="margin-left:auto;color:var(--muted);font-size:.7rem">${esc(when)}</span></div>\n          <div style="margin-top:.35rem;color:var(--muted);font-size:.72rem;font-family:'JetBrains Mono',monospace">VID ${(e.visitorId||"").slice(0,8)} · SID ${(e.sessionId||"").slice(0,8)} · ${esc(e.page||"Home")}</div>\n          ${url ? `<div style="margin-top:.25rem;color:var(--muted);font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(url)}">${esc(urlText)}</div>` : ""}\n        </div>`;
+      }).join("");
+    } catch (err) {
+      box.innerHTML = `<div style="color:var(--red);padding:1rem">Could not load click activity. Check your Firestore rules for the visitorEvents collection.</div>`;
+    }
+  }
+  window.loadVisitorEvents = loadVisitorEvents;
 
   // ── MAINTENANCE MODE ──
   async function loadMaintenanceSettings() {
